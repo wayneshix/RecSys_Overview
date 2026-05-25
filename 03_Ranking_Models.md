@@ -77,12 +77,12 @@ The ranking model **predicts** these rates: $p_1 = $ pCTR, $p_2 = $ p(like), $p_
 
 ### 1.3 Training
 
-Each objective is a **binary classification**. Labels $y_i \in \{0,1\}$ are the user's true behaviors (e.g. $(y_1,y_2,y_3,y_4) = (1,0,0,1)$ = "clicked, not liked, not collected, shared").
+Each objective is a **binary classification**. Labels $y_i \in \lbrace0,1\rbrace$ are the user's true behaviors (e.g. $(y_1,y_2,y_3,y_4) = (1,0,0,1)$ = "clicked, not liked, not collected, shared").
 
 Per-task loss is cross-entropy:
 
 $$
-\text{CrossEntropy}(y_i, p_i) = -\big[\, y_i \ln p_i + (1-y_i)\ln(1-p_i)\,\big].
+\text{CrossEntropy}(y_i, p_i) = -\big[ y_i \ln p_i + (1-y_i)\ln(1-p_i)\big].
 $$
 
 The total loss is a **weighted sum** over the four tasks:
@@ -128,7 +128,7 @@ $$
 Eliminating $n_+, n_-$ between the two equations gives the calibration formula (He et al., Facebook 2014):
 
 $$
-\boxed{\;p_{\text{true}} = \frac{\alpha \cdot p_{\text{pred}}}{(1 - p_{\text{pred}}) + \alpha \cdot p_{\text{pred}}}\;}
+\boxed{p_{\text{true}} = \frac{\alpha \cdot p_{\text{pred}}}{(1 - p_{\text{pred}}) + \alpha \cdot p_{\text{pred}}}}
 $$
 
 **Online flow:** the model outputs $p_{\text{pred}}$ → apply this formula → use the calibrated $p_{\text{true}}$ for ranking.
@@ -277,7 +277,7 @@ $$
 **Training** minimizes cross-entropy between $p$ and $y$:
 
 $$
-\mathcal{L} = -\Big[\, \frac{t}{1+t}\cdot \log p + \frac{1}{1+t}\cdot \log(1-p)\,\Big].
+\mathcal{L} = -\Big[ \frac{t}{1+t}\cdot \log p + \frac{1}{1+t}\cdot \log(1-p)\Big].
 $$
 
 **Key derivation:** at the optimum $p = y$, i.e. $\frac{\exp(z)}{1+\exp(z)} = \frac{t}{1+t}$, which forces
@@ -303,7 +303,7 @@ $$
 
 Online, $p = 0.73$ means "expected to play 73%".
 
-**Method B — binary classification.** Define a completion threshold, e.g. "completed = watched > 80%". For a 10-min video, > 8 min = positive, < 8 min = negative. Train a binary classifier. Online, $p = 0.73$ means $\mathbb{P}(\text{play} > 80\%) = 0.73$.
+**Method B — binary classification.** Define a completion threshold, e.g. "completed = watched > 80%". For a 10-min video, > 8 min = positive, < 8 min = negative. Train a binary classifier. Online, $p = 0.73$ means $\mathbb{P}(\text{play} > 0.8) = 0.73$.
 
 ### 5.4 Why you can't use predicted completion rate directly (important)
 
@@ -451,7 +451,7 @@ Pre-rank is commonly trained by **distillation**: the heavy, accurate **fine-ran
 ## Summary
 
 - **Multi-objective model:** one shared bottom + per-task Sigmoid heads predict click / like / collect / share rates; train with weighted cross-entropy.
-- **Imbalance:** down-sample negatives at rate $\alpha$ → predictions inflate → calibrate with $p_{\text{true}} = \frac{\alpha\, p_{\text{pred}}}{(1-p_{\text{pred}}) + \alpha\, p_{\text{pred}}}$.
+- **Imbalance:** down-sample negatives at rate $\alpha$ → predictions inflate → calibrate with $p_{\text{true}} = \frac{\alpha p_{\text{pred}}}{(1-p_{\text{pred}}) + \alpha p_{\text{pred}}}$.
 - **MMoE:** experts + per-task Softmax gates; beware **polarization**, fix with **dropout** on gate outputs.
 - **Score fusion:** weighted sum, click×rest, powered products, or rank-based — tuned by A/B tests.
 - **Video:** model play-time via the $\exp(z)=t$ trick; model completion rate but **normalize by video length** ($p_{\text{finish}} = \text{pred}/f(\text{length})$) for fairness.
@@ -468,7 +468,7 @@ The 2026 ranking literature pushes three frontiers that map directly onto this c
 
 > Bi, J., Niu, X., Cheng, D., Yuan, K., Wang, T., Cao, B., Wu, J., & Jiang, Y. (2026). *Generative pseudo-labeling for pre-ranking with LLMs*. arXiv. https://arxiv.org/abs/2602.20995
 
-**Method.** GPL attacks the **sample-selection bias (SSB, 样本选择偏差)** of pre-rank head-on: the model is trained only on *exposed* items but must score *all* recalled candidates online, including unexposed long-tail items. Instead of mislabeling unexposed items as negatives (negative sampling) or distilling from an already-biased ranker, GPL generates **unbiased, content-aware pseudo-labels** offline using an LLM. Items are tokenized into hierarchical **semantic IDs (SIDs)** by a frozen multimodal encoder + **RQ-VAE (Residual-Quantized VAE)**; a fine-tuned LLM predicts the user's next likely SIDs from history and decodes them into **interest anchors**. Relevance for an unexposed pair $(u, h)$ is the match between the user's anchors and the candidate in the frozen semantic space, calibrated by an uncertainty-aware weight (semantic coherence + historical consistency + LLM confidence). The pre-ranker then minimizes a confidence-weighted joint objective $\min_f \; \mathcal{L}_{\text{al}}(\mathcal{D}_e) + \lambda\,\mathcal{L}_{\text{pl}}(\mathcal{D}_u)$ over actual labels $\mathcal{D}_e$ and pseudo-labels $\mathcal{D}_u$.
+**Method.** GPL attacks the **sample-selection bias (SSB, 样本选择偏差)** of pre-rank head-on: the model is trained only on *exposed* items but must score *all* recalled candidates online, including unexposed long-tail items. Instead of mislabeling unexposed items as negatives (negative sampling) or distilling from an already-biased ranker, GPL generates **unbiased, content-aware pseudo-labels** offline using an LLM. Items are tokenized into hierarchical **semantic IDs (SIDs)** by a frozen multimodal encoder + **RQ-VAE (Residual-Quantized VAE)**; a fine-tuned LLM predicts the user's next likely SIDs from history and decodes them into **interest anchors**. Relevance for an unexposed pair $(u, h)$ is the match between the user's anchors and the candidate in the frozen semantic space, calibrated by an uncertainty-aware weight (semantic coherence + historical consistency + LLM confidence). The pre-ranker then minimizes a confidence-weighted joint objective $\min_f  \mathcal{L}_{\text{al}}(\mathcal{D}_e) + \lambda\mathcal{L}_{\text{pl}}(\mathcal{D}_u)$ over actual labels $\mathcal{D}_e$ and pseudo-labels $\mathcal{D}_u$.
 
 **Key results.** Deployed in a large-scale Alibaba production system: **+3.07% CTR** in online A/B testing, with improved recommendation diversity and long-tail item discovery.
 
@@ -508,7 +508,7 @@ The 2026 ranking literature pushes three frontiers that map directly onto this c
 
 **Method.** GEM-Rec (Google Research) unifies **organic** and **sponsored (ad)** ranking inside a single generative recommender built on TIGER-style **semantic IDs**. It augments the SID vocabulary with **control tokens** (`<ORG>` / `<AD>`) that *factorize the slot decision* (whether to show an ad) from the *content decision* (which item) — the model learns valid ad-placement patterns directly from interaction logs. At inference, a **Bid-Aware Decoding** mechanism injects real-time auction bids into the decoding search: for an `<AD>` branch, each candidate token's score is shifted by the max bid under its prefix (a precomputed lookup $B(c_k \mid c_{<k})$), with a parameter $\lambda$ controlling aggressiveness. They prove this guarantees **Allocative Monotonicity** (higher bids weakly increase exposure) and **Organic Integrity** (organic ranking stays purely relevance-based), *without retraining*.
 
-**Key results.** Simulation/offline experiments show a tunable **revenue–relevance frontier**: $\lambda = 0$ collapses to the baseline TIGER ad density ($\sim 3.5\%$), and increasing $\lambda$ trades NDCG@10 for higher total (first-price) revenue and ad rate, all controllable at serving time.
+**Key results.** Simulation/offline experiments show a tunable **revenue–relevance frontier**: $\lambda = 0$ collapses to the baseline TIGER ad density ($\sim 3.5$%), and increasing $\lambda$ trades NDCG@10 for higher total (first-price) revenue and ad rate, all controllable at serving time.
 
 **Trade-offs / limitations.** Results are from **simulated auction environments**, not a deployed system, so production CTR/revenue lift is unproven. Bid-aware decoding requires a per-prefix max-bid lookup table and assumes a (first-price) auction abstraction; correctness of the monotonicity guarantee depends on that abstraction.
 
@@ -564,10 +564,10 @@ InteractRank is Pinterest Search's production **pre-ranking** model, scoring $O(
 
 > Yang, X., Ben Ayed, M., Zhao, L., Zhou, F., Shen, Y., Engle, A., Zhuang, J., Leng, L., Xu, J., Rosenberg, C., & Deshikachar, P. (2025). *Deep reinforcement learning for ranking utility tuning in the ad recommender system at Pinterest*. arXiv. https://arxiv.org/abs/2509.05292
 
-This paper automates the **score-fusion (§4)** weights in Pinterest's ads ranker. The utility $U = p(\text{action})\cdot bid + \sum_i p(\text{engagement}_i)\cdot w_i$ is exactly the weighted-sum fusion of §4.1, but its weights $\{w_i\}$ were historically tuned by hand — unprincipled, combinatorially explosive, and *static* across users and seasons. DRL-PUT frames per-request weight selection as a one-step RL problem: a policy-based REINFORCE agent picks the discretized, semantically-grouped weight vector ($g^n = 1000$ actions) that maximizes a reward balancing revenue and user value, leaving all upstream prediction models frozen. Online A/B on the treated segment gave **CTR +9.71%** and CTR30 **+7.73%**; reward ablations expose the revenue-vs-engagement trade-off explicitly, and bucketing confirms it personalizes weights (higher $w_{click}$ for high-CTR users). The takeaway for §4: the fusion weights are themselves a learnable, personalizable decision rather than fixed A/B-tuned constants.
+This paper automates the **score-fusion (§4)** weights in Pinterest's ads ranker. The utility $U = p(\text{action})\cdot bid + \sum_i p(\text{engagement}_i)\cdot w_i$ is exactly the weighted-sum fusion of §4.1, but its weights $\lbrace w_i\rbrace$ were historically tuned by hand — unprincipled, combinatorially explosive, and *static* across users and seasons. DRL-PUT frames per-request weight selection as a one-step RL problem: a policy-based REINFORCE agent picks the discretized, semantically-grouped weight vector ($g^n = 1000$ actions) that maximizes a reward balancing revenue and user value, leaving all upstream prediction models frozen. Online A/B on the treated segment gave **CTR +9.71%** and CTR30 **+7.73%**; reward ablations expose the revenue-vs-engagement trade-off explicitly, and bucketing confirms it personalizes weights (higher $w_{click}$ for high-CTR users). The takeaway for §4: the fusion weights are themselves a learnable, personalizable decision rather than fixed A/B-tuned constants.
 
 ### Clean-Room CVR — Privacy-Preserving Multi-Task Conversion Modeling (calibration, CVR)
 
 > Li, K., Chen, X., Leng, L., Xu, J., Sun, J., & Rezaei, B. (2024). *Privacy preserving conversion modeling in data clean room*. In *Proceedings of the 18th ACM Conference on Recommender Systems (RecSys '24)* (pp. 819–822). ACM. https://doi.org/10.1145/3640457.3688054
 
-This addresses training a **multi-task CVR** model (the §1-style shared-bottom-plus-towers family — main click-through CVR plus 5 auxiliary tasks including CTR) when the advertiser holds the conversion labels and won't share them. Training runs as vertical split learning through a data clean room, exchanging only **batch-level aggregated gradients** $\nabla_f L = \sum_i (p_i - y_i)\,\partial z_i/\partial f$ (rather than per-sample gradients that leak labels), with gated LoRA adapters to cut cross-party communication. The chapter-relevant subtlety is **calibration (§2.4)**: label differential privacy (random label flips) miscalibrates CVR badly (calibration ratio up to 4.0 at $\epsilon=3$), which matters because ad auctions need calibrated probabilities, not just ranking AUC. Folding the flip probability $q_\epsilon = \frac{e^\epsilon}{e^\epsilon+1}$ into the loss as a de-biasing correction restores calibration to 1.0 with only a 0.2–0.5% AUC drop, projecting **>10% lower cost-per-action** for advertisers who previously had no conversion data.
+This addresses training a **multi-task CVR** model (the §1-style shared-bottom-plus-towers family — main click-through CVR plus 5 auxiliary tasks including CTR) when the advertiser holds the conversion labels and won't share them. Training runs as vertical split learning through a data clean room, exchanging only **batch-level aggregated gradients** $\nabla_f L = \sum_i (p_i - y_i)\partial z_i/\partial f$ (rather than per-sample gradients that leak labels), with gated LoRA adapters to cut cross-party communication. The chapter-relevant subtlety is **calibration (§2.4)**: label differential privacy (random label flips) miscalibrates CVR badly (calibration ratio up to 4.0 at $\epsilon=3$), which matters because ad auctions need calibrated probabilities, not just ranking AUC. Folding the flip probability $q_\epsilon = \frac{e^\epsilon}{e^\epsilon+1}$ into the loss as a de-biasing correction restores calibration to 1.0 with only a 0.2–0.5% AUC drop, projecting **>10% lower cost-per-action** for advertisers who previously had no conversion data.

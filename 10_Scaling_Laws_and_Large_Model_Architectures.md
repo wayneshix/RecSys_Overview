@@ -27,7 +27,7 @@ The one-sentence thesis: **LLMs taught us that loss falls as a predictable power
 A **scaling law** is an empirical, smooth, *power-law* relationship between a model's quality and the resources spent on it. In language modeling (Kaplan et al., 2020; Hoffmann et al., 2022) the canonical form is
 
 $$
-L(N) \;\approx\; L_\infty + \left(\frac{N_c}{N}\right)^{\alpha_N},
+L(N) \approx L_\infty + \left(\frac{N_c}{N}\right)^{\alpha_N},
 $$
 
 where $L$ is test loss, $N$ is the number of (non-embedding) parameters, $L_\infty$ is the irreducible loss, and $\alpha_N$ is a small positive exponent. Analogous laws hold in dataset size $D$ and total training compute $C \approx 6ND$. Two consequences matter:
@@ -100,13 +100,13 @@ All of these take [Note 04](04_Feature_Interaction.md)'s explicit crossing (FM �
 | Model | Org / Year | Core idea | How S & NS interact | Key efficiency trick | Detail |
 |---|---|---|---|---|---|
 | **InterFormer** | Meta, 2024 | Interleave S & NS with **bidirectional** flow; avoid early aggregation | NS-summary guides S via PFFN+MHA, S-summary guides NS (two-way) | One-to-one token mapping; +24% QPS vs prior SOTA | [N04](04_Feature_Interaction.md) |
-| **OneTrans** | ByteDance, 2025 | **Fully unified**: one tokenizer → single token stream | Merged stream; HiFormer-style **mixed params** (S shares Q/K/V/FFN, NS token-specific) | **Cross-request KV cache** $O(C)\!\to\!O(1)$; pyramid token pruning | [N04](04_Feature_Interaction.md) |
+| **OneTrans** | ByteDance, 2025 | **Fully unified**: one tokenizer → single token stream | Merged stream; HiFormer-style **mixed params** (S shares Q/K/V/FFN, NS token-specific) | **Cross-request KV cache** $O(C)\toO(1)$; pyramid token pruning | [N04](04_Feature_Interaction.md) |
 | **HyFormer** | ByteDance, 2026 | Critiques merged stream; **alternating** Query Decoding + Query Boosting | NS Global Tokens cross-attend layer-wise K/V of *independent* sequences | HeadMixing token mixing; sequence-specific K/V | [N04](04_Feature_Interaction.md) |
 | **MixFormer** | ByteDance, 2026 | **Co-scaling** S & NS in one parameter space | Decoder cross-attn: **NS = Query, S = Key/Value** | User-Item decoupling + **request-level batching** (≈36% FLOPs saved) | [N04](04_Feature_Interaction.md) |
 | **TokenMixer-Large** | ByteDance, 2026 | Pure **feature-interaction** backbone (RankMixer) made depth-stable | (S handled upstream; NS/dense tower) | Mixing-and-reverting + interval residuals; **Sparse per-token MoE**; 7B online | [N04](04_Feature_Interaction.md) |
 | **Kunlun** | Meta, 2026 | InterFormer + **model-efficiency codesign** for true power-law scaling | Bidirectional S↔NS (Wukong/Adv-FM interaction core) | **GDPA** fused kernel, HSP, sliding-window attn, **CompSkip**; MFU 17→37% | [N04](04_Feature_Interaction.md) |
-| **EST** | Alibaba, 2026 | **Effective-rank** analysis → keep only high-signal **S–NS cross block** | Lightweight Cross-Attention (prune self-blocks) | Content Sparse Attention (top-k neighbors); $O(L^2)\!\to\!O(LK)$ | [N04](04_Feature_Interaction.md) |
-| **HeMix** | Alibaba/AMAP, 2026 | **Interact-then-split** (opposite of OneTrans) to preserve semantics | Q-Former-style learnable query tokens ($Q_G$ global, $Q_R$ real-time) extract interests; HeteroMixer | **Low-rank MLP token mixer** ($d_r \ll N\!\cdot\!d_h$) | [N04](04_Feature_Interaction.md) |
+| **EST** | Alibaba, 2026 | **Effective-rank** analysis → keep only high-signal **S–NS cross block** | Lightweight Cross-Attention (prune self-blocks) | Content Sparse Attention (top-k neighbors); $O(L^2)\toO(LK)$ | [N04](04_Feature_Interaction.md) |
+| **HeMix** | Alibaba/AMAP, 2026 | **Interact-then-split** (opposite of OneTrans) to preserve semantics | Q-Former-style learnable query tokens ($Q_G$ global, $Q_R$ real-time) extract interests; HeteroMixer | **Low-rank MLP token mixer** ($d_r \ll N\cdotd_h$) | [N04](04_Feature_Interaction.md) |
 | **HSTU lineage** (HSTU, ULTRA-HSTU) | Meta, 2024–26 | **Generative** sequence backbone; replace feature engineering with self-attn | Sequence-first; candidates appended / target-aware (see §6) | Semi-local attention $O((K_1{+}K_2)L)$; FP8/INT4; Attention Truncation | [N05](05_Sequence_Modeling.md) |
 
 **Reading the table for interviews.** Two axes organize everything: **(1) how unified** — one merged stream (OneTrans) vs. independent sequences with cross-attention/decoding (HyFormer, MixFormer, EST, HeMix) vs. interaction-only towers (TokenMixer-Large) vs. sequence-first generative (HSTU); and **(2) where to spend FLOPs** — full attention vs. cross-only/sparse attention, dense MLP vs. sparse-MoE expansion, and architectural vs. kernel-level efficiency (Kunlun's GDPA is mostly the latter). Note the **org clustering**: Meta favors the bidirectional InterFormer→Kunlun + generative HSTU lineages; ByteDance favors token-mixing (RankMixer→TokenMixer-Large) and unified Transformers (OneTrans/HyFormer/MixFormer); Alibaba favors rank-/cross-pruned attention (EST, HeMix).

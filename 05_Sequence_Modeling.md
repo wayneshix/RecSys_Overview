@@ -43,7 +43,7 @@ This entire Part focuses on **one slice of the user features: the LastN behavior
 Formally, let the LastN item embeddings be $\mathbf{x}_1, \dots, \mathbf{x}_n \in \mathbb{R}^d$. The feature is:
 
 $$
-\mathbf{u}_{\text{avg}} \;=\; \frac{1}{n}\sum_{i=1}^{n} \mathbf{x}_i .
+\mathbf{u}_{\text{avg}} = \frac{1}{n}\sum_{i=1}^{n} \mathbf{x}_i .
 $$
 
 Reference: Covington, Adams, and Sargin, *Deep Neural Networks for YouTube Recommendations*, RecSys 2016 — this is the original "average of watched-video embeddings as a user vector" idea.
@@ -99,7 +99,7 @@ This is exactly the gap DIN closes.
 **Step 1 — similarities (相似度).** For each LastN vector $\mathbf{x}_i$, compute a scalar similarity $\alpha_i$ to the candidate $\mathbf{q}$:
 
 $$
-\alpha_i \;=\; \text{sim}(\mathbf{x}_i, \mathbf{q}), \qquad i = 1, \dots, n.
+\alpha_i = \text{sim}(\mathbf{x}_i, \mathbf{q}), \qquad i = 1, \dots, n.
 $$
 
 The similarity function can be an **inner product** $\mathbf{x}_i^\top \mathbf{q}$, **cosine similarity**, or something more elaborate (e.g. a small MLP on $[\mathbf{x}_i, \mathbf{q}, \mathbf{x}_i - \mathbf{q}, \mathbf{x}_i \odot \mathbf{q}]$, as in the original paper). Each $\alpha_i$ is a real number; the more similar a LastN item is to the candidate, the larger its weight.
@@ -107,7 +107,7 @@ The similarity function can be an **inner product** $\mathbf{x}_i^\top \mathbf{q
 **Step 2 — weighted sum (加权和).** Use the similarities as weights and sum the LastN vectors:
 
 $$
-\mathbf{u}_{\text{DIN}} \;=\; \sum_{i=1}^{n} \alpha_i\, \mathbf{x}_i .
+\mathbf{u}_{\text{DIN}} = \sum_{i=1}^{n} \alpha_i \mathbf{x}_i .
 $$
 
 (If the $\alpha_i$ are normalized — e.g. via softmax — this is a weighted *average*; the lecture states it as a weighted sum / weighted average. The key point is that weights are candidate-dependent.)
@@ -165,7 +165,7 @@ This distinction is a classic interview point.
 DIN's attention layer has compute **proportional to $n$**, the sequence length:
 
 $$
-\text{cost}_{\text{DIN}} \;\propto\; n .
+\text{cost}_{\text{DIN}} \propto n .
 $$
 
 So DIN can only afford to keep the last ~100–200 items, otherwise the cost explodes. The downside (缺点): a short window captures only **short-term interest** (短期兴趣) and **forgets long-term interest** (遗忘长期兴趣).

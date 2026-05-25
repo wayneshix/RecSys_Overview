@@ -151,7 +151,7 @@ Channel applicability:
 **Lifecycle of channels** (zero → high exposure):
 
 $$
-\text{category, clustering} \;\longrightarrow\; \text{Look-Alike} \;\longrightarrow\; \text{two-tower, collaborative filtering}
+\text{category, clustering} \longrightarrow \text{Look-Alike} \longrightarrow \text{two-tower, collaborative filtering}
 $$
 
 Content-based channels (category, clustering) fire first (need no interaction); once a few interactions appear, Look-Alike can retrieve more accurately; as exposure/interaction grow, two-tower and CF take over.
@@ -218,7 +218,7 @@ Each training sample is a **triplet**: a **seed note (种子笔记)** $\mathbf{a
 **Triplet hinge loss:**
 
 $$
-L(\mathbf{a}, \mathbf{b}^+, \mathbf{b}^-) = \max\!\Big\{0,\; \cos(\mathbf{a},\mathbf{b}^-) + m - \cos(\mathbf{a},\mathbf{b}^+)\Big\}
+L(\mathbf{a}, \mathbf{b}^+, \mathbf{b}^-) = \max\Big\lbrace0, \cos(\mathbf{a},\mathbf{b}^-) + m - \cos(\mathbf{a},\mathbf{b}^+)\Big\rbrace
 $$
 
 where $m$ is the **margin** hyperparameter (e.g. $m=1$).
@@ -226,7 +226,7 @@ where $m$ is the **margin** hyperparameter (e.g. $m=1$).
 **Triplet logistic loss:**
 
 $$
-L(\mathbf{a}, \mathbf{b}^+, \mathbf{b}^-) = \log\!\Big(1 + \alpha \cdot \exp\big(\cos(\mathbf{a},\mathbf{b}^-) - \cos(\mathbf{a},\mathbf{b}^+)\big)\Big)
+L(\mathbf{a}, \mathbf{b}^+, \mathbf{b}^-) = \log\Big(1 + \alpha \cdot \exp\big(\cos(\mathbf{a},\mathbf{b}^-) - \cos(\mathbf{a},\mathbf{b}^+)\big)\Big)
 $$
 
 where $\alpha > 0$ controls the logistic shape (slides write it without the leading $\alpha$; the Notes include $\alpha$).
@@ -328,7 +328,7 @@ t = \frac{\text{publish time}}{\text{target time}}, \qquad x = \frac{\text{exist
 $$
 
 $$
-\text{boost coefficient} = f\!\left(\frac{\text{publish time}}{\text{target time}},\; \frac{\text{existing exposure}}{\text{target exposure}}\right) = f(t, x)
+\text{boost coefficient} = f\left(\frac{\text{publish time}}{\text{target time}}, \frac{\text{existing exposure}}{\text{target exposure}}\right) = f(t, x)
 $$
 
 Example: published 12h ago of a 24h target → $t = 0.5$; has 20 of 100 target exposures → $x = 0.2$ → $f(0.5, 0.2)$. **Larger $t$, smaller $x$ ⇒ larger boost** (behind schedule on time, short on exposure → push harder).
@@ -336,7 +336,7 @@ Example: published 12h ago of a 24h target → $t = 0.5$; has 20 of 100 target e
 **The boost formula (from the Notes — interview-grade detail).** Under uniform delivery the ideal is $x = t$; if $x < t$, accelerate. But industry found uniform delivery is *not* optimal — **earlier exposure has higher utility** for incentivizing publishing (100 exposures in hour 1 ≫ 100 exposures in hour 24), so delivery should be **front-loaded** (fast early, decaying). A simple boost formula depending only on $t, x$:
 
 $$
-\text{boost} = \max\!\left(\frac{\alpha}{\sqrt{1 + \beta t + \gamma x}},\; 1\right), \quad \alpha,\beta,\gamma > 0
+\text{boost} = \max\left(\frac{\alpha}{\sqrt{1 + \beta t + \gamma x}}, 1\right), \quad \alpha,\beta,\gamma > 0
 $$
 
 Boost decreases with $t$ (support decays over age) and with $x$ (more exposure → less support); floored at $1$ so a new item is never *suppressed* below natural distribution.
@@ -348,7 +348,7 @@ $$
 $$
 
 $\theta$ controls front-load speed (initial slope $1+\theta$; $\theta = 0$ = uniform). Then `boost = max{ g(y(t) − x), 1 }` with $g$ monotone increasing (e.g. $g(\cdot)=\alpha\exp(\cdot)$): if actual $x$ lags the curve, boost more.
-The Notes also cover **multi-stage quota** (e.g. 100 in 24h, then 200 in 72h) and **time-of-day normalized delivery** — because nighttime traffic is small, replace raw $t$ by a flow-weighted $t'$ using a normalized hourly-exposure density $f(k)$ (with $\int_0^{24} f(k)\,dk = 1$); the "clock slows down" at night.
+The Notes also cover **multi-stage quota** (e.g. 100 in 24h, then 200 in 72h) and **time-of-day normalized delivery** — because nighttime traffic is small, replace raw $t$ by a flow-weighted $t'$ using a normalized hourly-exposure density $f(k)$ (with $\int_0^{24} f(k)dk = 1$); the "clock slows down" at night.
 
 **Difficulty: success rate ≪ 100%** — many notes don't reach 100 exposures in 24h. Causes: (i) retrieval/ranking weaknesses (some note types are hard to retrieve); (ii) badly-tuned boost coefficients; (iii) **online environment changes** (new retrieval channel, upgraded ranking model, changed re-rank diversification rules) that perturb exposure and force re-tuning.
 
@@ -461,7 +461,7 @@ This section connects the chapter's content-embedding / clustering-retrieval mat
 - **Sequence model = a BERT-like Transformer encoder** over a temporally-ordered sequence of fused shot embeddings (up to **512 shots**). A learnable `[CLS]` token and a `[GLOBAL]` token (title-level metadata — synopses/tags — encoded by text-embedding-3-large) are prepended, so every shot attends to global title context. The fused embeddings are first projected to the hidden dim, contextualized through the Transformer stack with positional embeddings, then projected back up to the 2304-dim space.
 - **Training objective = Masked Shot Modeling (MSM)**, a continuous analogue of BERT's masked-language-modeling. Randomly mask **20%** of shots with a learnable `[MASK]` embedding and predict the original fused embedding, minimizing **cosine distance** to the ground truth:
   $$
-  L_{\text{MSM}} = \sum_{i \in \mathcal{M}} \Big(1 - \cos\big(\hat{\mathbf{e}}_i,\; \mathbf{e}_i\big)\Big)
+  L_{\text{MSM}} = \sum_{i \in \mathcal{M}} \Big(1 - \cos\big(\hat{\mathbf{e}}_i, \mathbf{e}_i\big)\Big)
   $$
   where $\mathcal{M}$ is the masked-shot set, $\mathbf{e}_i$ the ground-truth fused embedding, $\hat{\mathbf{e}}_i$ the prediction. Optimizer: **Muon** for hidden parameters, **AdamW** for the rest (the switch to Muon gave noticeable gains). The output is a content embedding learned *with no interaction data* — the property that makes it usable for cold-start.
 

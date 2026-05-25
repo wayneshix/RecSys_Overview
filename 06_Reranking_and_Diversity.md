@@ -122,13 +122,13 @@ Notation: `S` = already-**selected** items (选中), `R` = **remaining**/unselec
 For each candidate `i ∈ R`, define the **Marginal Relevance** score:
 
 $$
-\text{MR}_i = \underbrace{\theta \cdot \text{reward}_i}_{\text{item value (精排分数)}} \;-\; \underbrace{(1-\theta)\cdot \max_{j \in S} \text{sim}(i, j)}_{\text{diversity penalty (多样性分数)}}.
+\text{MR}_i = \underbrace{\theta \cdot \text{reward}_i}_{\text{item value (精排分数)}} - \underbrace{(1-\theta)\cdot \max_{j \in S} \text{sim}(i, j)}_{\text{diversity penalty (多样性分数)}}.
 $$
 
 MMR then selects:
 
 $$
-\text{MMR} = \arg\max_{i \in R}\; \text{MR}_i = \arg\max_{i \in R}\left[\, \theta \cdot \text{reward}_i - (1-\theta)\cdot \max_{j \in S}\text{sim}(i,j)\,\right].
+\text{MMR} = \arg\max_{i \in R} \text{MR}_i = \arg\max_{i \in R}\left[ \theta \cdot \text{reward}_i - (1-\theta)\cdot \max_{j \in S}\text{sim}(i,j)\right].
 $$
 
 **Reading the formula.**
@@ -153,7 +153,7 @@ After `k − 1` rounds, `S` holds the `k` items to expose. Because `S` changes e
 **Fix:** keep a fixed-size **sliding window** `W` (e.g. the 10 most recently selected items), a subset of `S`, and replace `S` with `W` in the diversity term:
 
 $$
-\arg\max_{i \in R}\left[\, \theta \cdot \text{reward}_i - (1-\theta)\cdot \max_{j \in W}\text{sim}(i,j)\,\right].
+\arg\max_{i \in R}\left[ \theta \cdot \text{reward}_i - (1-\theta)\cdot \max_{j \in W}\text{sim}(i,j)\right].
 $$
 
 Now a new item only needs to differ from the `|W|` *recent* selections, not all of `S`. (Intuition: a user scrolling a feed only notices repetition among nearby items.)
@@ -191,7 +191,7 @@ Re-ranking maximizes MR **subject to** the rules. The trick is simple and works 
 - Then run the usual selection over `R'`:
 
 $$
-\arg\max_{i \in R'}\left[\, \theta \cdot \text{reward}_i - (1-\theta)\cdot \max_{j \in W}\text{sim}(i,j)\,\right].
+\arg\max_{i \in R'}\left[ \theta \cdot \text{reward}_i - (1-\theta)\cdot \max_{j \in W}\text{sim}(i,j)\right].
 $$
 
 The selected item is now rule-compliant **and** high value + diverse. The only change vs. plain MMR is `R → R'`. (Shrinking `R` to `R'` also reduces compute slightly.)
@@ -207,7 +207,7 @@ DPP is a classical statistical-ML method (roots in 1970s; popular in the kernel-
 A **hyper-parallelotope** generalizes the parallelogram (2D, 平行四边形) and parallelepiped (3D, 平行六面体). Given vectors `v_1, …, v_k ∈ ℝᵈ`:
 
 $$
-\mathcal{P}(v_1, \dots, v_k) = \{\, \alpha_1 v_1 + \dots + \alpha_k v_k \mid 0 \le \alpha_1, \dots, \alpha_k \le 1 \,\}.
+\mathcal{P}(v_1, \dots, v_k) = \lbrace \alpha_1 v_1 + \dots + \alpha_k v_k \mid 0 \le \alpha_1, \dots, \alpha_k \le 1 \rbrace.
 $$
 
 - The edge vectors uniquely determine the body. Requires **`k ≤ d`** (a 2D parallelogram can sit in 3D, but a 3D parallelepiped cannot fit in 2D).
@@ -216,7 +216,7 @@ $$
 **Volume via orthogonalization (Gram-Schmidt projection).** For a parallelogram with base `v_1`, the height is `v_2` minus its projection onto `v_1`:
 
 $$
-q_2 = v_2 - \text{Proj}_{v_1}(v_2), \qquad \text{Proj}_{v_1}(v_2) = \frac{v_1^\top v_2}{\lVert v_1 \rVert_2^2}\, v_1,
+q_2 = v_2 - \text{Proj}_{v_1}(v_2), \qquad \text{Proj}_{v_1}(v_2) = \frac{v_1^\top v_2}{\lVert v_1 \rVert_2^2} v_1,
 $$
 
 with `q_2 ⟂ v_1`, and `vol(P) = ‖v_1‖₂ · ‖q_2‖₂` (base × height). For 3D:
@@ -238,7 +238,7 @@ So **volume measures set diversity**.
 Stack the `k` chosen unit vectors as columns of `V_S ∈ ℝ^{d×k}`. Then `A_S = V_Sᵀ V_S` is a `k×k` symmetric positive-semidefinite matrix (a Gram matrix; entry `(i,j)` is `v_iᵀ v_j`). For `k ≤ d`:
 
 $$
-\boxed{\;\det\!\big(V_S^\top V_S\big) = \mathrm{vol}\big(\mathcal{P}(v_1,\dots,v_k)\big)^2\;}
+\boxed{\det\big(V_S^\top V_S\big) = \mathrm{vol}\big(\mathcal{P}(v_1,\dots,v_k)\big)^2}
 $$
 
 (When `k = d`, `V_S` is square and `|\det(V_S)| = \mathrm{vol}(\mathcal P)`; the `k ≤ d` case is proven via an orthogonal rotation `R` that maps the vectors into a `k`-dim subspace, giving `Vᵀ V = Uᵀ U` with `U` square, then `det(VᵀV) = det(U)²`.)
@@ -250,13 +250,13 @@ Taking logs: `log det(A_S) = 2 · log vol(P(V_S))`. Therefore **`log det(A_S)` m
 Pure (k-)DPP — diversity only:
 
 $$
-\arg\max_{S:\,|S|=k}\; \log\det\!\big(V_S^\top V_S\big) \;=\; \arg\max_{S:\,|S|=k}\; \log\det(A_S).
+\arg\max_{S:|S|=k} \log\det\big(V_S^\top V_S\big) = \arg\max_{S:|S|=k} \log\det(A_S).
 $$
 
 Hulu's recommendation objective — **value + diversity**:
 
 $$
-\boxed{\;\arg\max_{S:\,|S|=k}\;\; \theta \cdot \Big(\textstyle\sum_{j \in S} \text{reward}_j\Big) \;+\; (1-\theta)\cdot \log\det(A_S)\;}
+\boxed{\arg\max_{S:|S|=k} \theta \cdot \Big(\textstyle\sum_{j \in S} \text{reward}_j\Big) + (1-\theta)\cdot \log\det(A_S)}
 $$
 
 where:
@@ -271,7 +271,7 @@ This is a **combinatorial optimization** (choose a size-`k` subset of `{1,…,n}
 `S` = selected, `R` = remaining. Each round add the item maximizing the marginal gain:
 
 $$
-\arg\max_{i \in R}\;\; \theta \cdot \text{reward}_i \;+\; (1-\theta)\cdot \log\det\!\big(A_{S\cup\{i\}}\big).
+\arg\max_{i \in R} \theta \cdot \text{reward}_i + (1-\theta)\cdot \log\det\big(A_{S\cup\lbrace i\rbrace}\big).
 $$
 
 **Intuition for the determinant term.** Adding item `i` appends one row and one column to `A_S`. We want the new item to *increase* the determinant (volume), i.e. `v_i` should be **as orthogonal as possible** to the span of the already-selected vectors. If `v_i` is similar to some selected item, the new det → 0 and `log det → −∞`, strongly discouraging the pick.
@@ -281,7 +281,7 @@ $$
 **Brute force.** Computing `det(A_{S∪{i}})` by eig/Cholesky decomposition from scratch costs `O(|S|³)`. Over all `i ∈ R`: `O(|S|³·|R|)`. Repeating `k` times to grow `S` from 1 to `k`:
 
 $$
-O(|S|^3 \cdot |R| \cdot k) = O(nk^4), \quad\text{plus } O(n^2 d)\text{ to build } A \;\Rightarrow\; O(n^2 d + n k^4).
+O(|S|^3 \cdot |R| \cdot k) = O(nk^4), \quad\text{plus } O(n^2 d)\text{ to build } A \Rightarrow O(n^2 d + n k^4).
 $$
 
 **Hulu's fast numerical algorithm — incremental Cholesky.** Total cost only **`O(n²d + nk²)`**:
@@ -295,7 +295,7 @@ Key facts:
 **Incremental update derivation.** With `a_{ii} = v_iᵀ v_i = 1` (unit vectors),
 
 $$
-A_{S\cup\{i\}} = \begin{bmatrix} A_S & a_i \\ a_i^\top & 1 \end{bmatrix}
+A_{S\cup\lbrace i\rbrace} = \begin{bmatrix} A_S & a_i \\ a_i^\top & 1 \end{bmatrix}
 = \begin{bmatrix} L & 0 \\ c_i^\top & d_i \end{bmatrix}\begin{bmatrix} L & 0 \\ c_i^\top & d_i \end{bmatrix}^\top
 = \begin{bmatrix} LL^\top & Lc_i \\ c_i^\top L^\top & c_i^\top c_i + d_i^2 \end{bmatrix}.
 $$
@@ -309,13 +309,13 @@ $$
 Since `L` is lower-triangular, solve `c_i = L^{-1} a_i` by forward substitution in `O(|S|²)`, then `d_i² = 1 - c_iᵀ c_i`. The new determinant is:
 
 $$
-\det\!\big(A_{S\cup\{i\}}\big) = \det(L)^2 \times d_i^2.
+\det\big(A_{S\cup\lbrace i\rbrace}\big) = \det(L)^2 \times d_i^2.
 $$
 
 Because `det(L)²` is the **same for all `i`** (independent of `i`), the greedy step simplifies to:
 
 $$
-\boxed{\; i^\star = \arg\max_{i \in R}\;\; \theta \cdot \text{reward}_i + (1-\theta)\cdot \log d_i^2 \;}
+\boxed{ i^\star = \arg\max_{i \in R} \theta \cdot \text{reward}_i + (1-\theta)\cdot \log d_i^2 }
 $$
 
 **Algorithm:**
@@ -335,7 +335,7 @@ Naively this is `O(n²d + nk³)`; reusing the previous round's solve of `a_i = L
 The **sliding window is even more necessary for DPP** than for MMR. As `S` grows it inevitably contains similar items ⇒ vectors approach linear dependence ⇒ `det(A_S) → 0` ⇒ `log det → −∞`, blowing up the objective. Fix: replace `S` with a small window `W`:
 
 $$
-\arg\max_{i \in R}\;\; \theta \cdot \text{reward}_i + (1-\theta)\cdot \log\det\!\big(A_{W\cup\{i\}}\big).
+\arg\max_{i \in R} \theta \cdot \text{reward}_i + (1-\theta)\cdot \log\det\big(A_{W\cup\lbrace i\rbrace}\big).
 $$
 
 **Rules** apply identically: filter `R → R'` first, then optimize over `R'`. The numerical algorithm is essentially unchanged.
@@ -347,7 +347,7 @@ DPP's numerical algorithm is fiddly to implement. **Modified Gram-Schmidt (MGS)*
 Idea: instead of tracking Cholesky factors, directly maintain orthogonalized residual vectors. Since `vol(S) = ‖q_1‖₂ · ‖q_2‖₂ ⋯ ‖q_t‖₂` and `vol(S∪{i}) = vol(S)·‖q_i‖₂`, and `log vol(S)` is independent of `i`, the greedy step becomes:
 
 $$
-\arg\max_{i \in R}\;\; \theta \cdot \text{reward}_i + (1-\theta)\cdot \log\big(\lVert q_i \rVert_2\big),
+\arg\max_{i \in R} \theta \cdot \text{reward}_i + (1-\theta)\cdot \log\big(\lVert q_i \rVert_2\big),
 $$
 
 where `q_i` is item `i`'s component orthogonal to the span of already-selected vectors. MGS is mathematically equivalent to GS but numerically more stable (avoids error accumulation), and runs in **`O(ndk)`**: each of the `k−1` rounds orthogonalizes the `O(n)` remaining vectors against the newest basis vector at `O(d)` each.
@@ -359,7 +359,7 @@ where `q_i` is item `i`'s component orthogonal to the span of already-selected v
 Both MMR and DPP optimize the **same shape**:
 
 $$
-\text{select } i = \arg\max_i \;\; \underbrace{\theta \cdot \text{value}}_{\text{user interest}} \;+\; \underbrace{(1-\theta)\cdot \text{diversity}}_{\text{set freshness}}.
+\text{select } i = \arg\max_i  \underbrace{\theta \cdot \text{value}}_{\text{user interest}} + \underbrace{(1-\theta)\cdot \text{diversity}}_{\text{set freshness}}.
 $$
 
 - **`reward` term:** "Is this item interesting to the user *on its own*?" Maximizing reward alone gives a list that may be relevant but monotonous (all NBA clips).

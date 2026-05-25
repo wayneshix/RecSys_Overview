@@ -93,12 +93,12 @@ Reading the map: (a) feeds *features into* every stage and is invisible at servi
 Re-ranking selects and orders the final $k$ items from $n$ candidates ([Note 06 §1](06_Reranking_and_Diversity.md)). Classical re-rankers optimize a **hand-crafted set objective** steered by one scalar $\theta$:
 
 $$
-\text{select } i = \arg\max_i \; \underbrace{\theta \cdot \text{reward}_i}_{\text{value}} \;+\; \underbrace{(1-\theta)\cdot \text{diversity}_i}_{\text{MMR pairwise / DPP }\log\det}.
+\text{select } i = \arg\max_i  \underbrace{\theta \cdot \text{reward}_i}_{\text{value}} + \underbrace{(1-\theta)\cdot \text{diversity}_i}_{\text{MMR pairwise / DPP }\log\det}.
 $$
 
 A reasoning re-ranker discards the closed-form objective. The LLM reads the user's history and the candidate set — each item tagged with **Semantic IDs (语义 ID)** plus title/category metadata — and **reasons in natural language** about the right order, emitting a CoT trace and a structured (JSON) ranked list. The objective is no longer written down by a human; it is *learned* by RL. GR2's training pipeline:
 
-1. **Semantic-ID mid-training (语义 ID 中训练).** Billions of raw item IDs would blow up the LLM vocabulary, so an RQ-VAE tokenizer (à la TIGER) maps each item to a short discrete code sequence with $\ge 99\%$ uniqueness, using a contrastive loss to encode co-engagement. The student LLM (e.g. Qwen3-8B) is mid-trained on a mixture of these SIDs interleaved with natural-language world knowledge, via next-token prediction — bridging recsys IDs into the LLM's linguistic/world-knowledge space.
+1. **Semantic-ID mid-training (语义 ID 中训练).** Billions of raw item IDs would blow up the LLM vocabulary, so an RQ-VAE tokenizer (à la TIGER) maps each item to a short discrete code sequence with $\ge 99$% uniqueness, using a contrastive loss to encode co-engagement. The student LLM (e.g. Qwen3-8B) is mid-trained on a mixture of these SIDs interleaved with natural-language world knowledge, via next-token prediction — bridging recsys IDs into the LLM's linguistic/world-knowledge space.
 2. **Reasoning SFT (推理监督微调).** A larger teacher LLM (e.g. Qwen3-32B) generates hierarchical CoT traces (history summary → category pattern → complementarity → candidate match) via re-ranking-specific prompts and **rejection sampling** (keep a trace only when its prediction matches the ground-truth next item, filtering hallucinated rationales). The student is SFT-ed on the curated traces, with decoupled loss weights $\lambda_r < \lambda_o$ so ranking accuracy is not drowned out by reasoning fluency.
 3. **RL via DAPO (强化学习).** Decoupled Clip and Dynamic sAmpling Policy Optimization — a GRPO descendant that fixes entropy collapse and rollout-length bias — refines the policy against **verifiable rewards** designed for ranking (§2.2).
 
@@ -174,7 +174,7 @@ Where RecoWorld supplies the *environment*, the **Self-Evolving Recommendation S
 
 $$
 \underbrace{\theta^{\ast}(\Phi) = \arg\min_\theta L_{\text{proxy}}(D; \theta, \Phi)}_{\text{lower level: train weights on a proxy reward}}, \qquad
-\underbrace{\Phi^{\ast} = \arg\max_\Phi \; \mathbb{E}\big[M(\theta^{\ast}(\Phi))\big] \;\; \text{s.t. } G(\Phi) \le C}_{\text{upper level: choose meta-config for delayed north-star metric}}
+\underbrace{\Phi^{\ast} = \arg\max_\Phi  \mathbb{E}\big[M(\theta^{\ast}(\Phi))\big]  \text{s.t. } G(\Phi) \le C}_{\text{upper level: choose meta-config for delayed north-star metric}}
 $$
 
 where $\Phi$ = {optimizer, architecture, reward definition} and $M$ = delayed business (north-star) metrics. Two synchronized loops run it:
@@ -224,7 +224,7 @@ A useful heuristic: **push the LLM as far off the request path as the task allow
 | Three roles | (a) **encoder/FM** — offline feature; (b) **reasoner/reranker** — on request path; (c) **agent** — in dev loop. Cost lands offline / per-request / in training respectively. |
 | Role (a) examples | User FM (Coinbase, Note 05); content FM (Netflix MediaFM, Note 07); reasoning-aligned multimodal SIDs (QARM V2, Note 05). |
 | Role (b) = GR2 | **SID mid-training → reasoning SFT → RL (DAPO)**. Beats OneRec-Think +2.4% Recall@5, +1.3% NDCG@5. |
-| Semantic IDs | RQ-VAE tokenizer maps billions of raw IDs → short discrete codes ($\ge 99\%$ unique); avoids LLM vocab blowup; the shared substrate for GR2 and QARM V2. |
+| Semantic IDs | RQ-VAE tokenizer maps billions of raw IDs → short discrete codes ($\ge 99$% unique); avoids LLM vocab blowup; the shared substrate for GR2 and QARM V2. |
 | Ranking reward | verifiable: how far re-ranking promoted the ground-truth target, $R_{\text{rank}} = (r^{\mathcal{D}} - r^{o})/|\mathcal{D}|$. |
 | Reward hacking | naive $R_{\text{rank}}+R_{\text{fmt}}$ ⇒ model echoes input order to harvest format reward; fix = **conditional** format reward (grant only if ranking improved). |
 | vs MMR/DPP | classical = hand-crafted closed-form objective + explicit $\log\det$ diversity, $O(n^2d+nk^2)$; reasoning re-ranker = learned RL policy, diversity emergent, far heavier; LLM viable only for small $n$. |

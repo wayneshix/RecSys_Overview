@@ -256,7 +256,7 @@ Notation: let $\mathbf{A}$ = user embedding matrix (column $u$ = vector $\mathbf
 
 ### 5.2 Training
 
-Dataset $\Omega = \{(u, i, y)\}$ of (user ID, item ID, interest score) triples, where scores are recorded by the system:
+Dataset $\Omega = \lbrace(u, i, y)\rbrace$ of (user ID, item ID, interest score) triples, where scores are recorded by the system:
 - Exposed but no click → 0 points.
 - Click, like, save, share → +1 each.
 - Score range: min 0, max 4.
@@ -316,7 +316,7 @@ The two-tower model (a.k.a. DSSM-style) is matrix completion upgraded to use ric
 **Output:** cosine similarity of the two vectors:
 
 $$
-\cos(\mathbf{a}, \mathbf{b}) = \frac{\langle \mathbf{a}, \mathbf{b}\rangle}{\|\mathbf{a}\|_2 \cdot \|\mathbf{b}\|_2}.
+\cos(\mathbf{a}, \mathbf{b}) = \frac{\langle \mathbf{a}, \mathbf{b}\rangle}{\Vert\mathbf{a}\Vert_2 \cdot \Vert\mathbf{b}\Vert_2}.
 $$
 
 This cosine is the estimated user interest. (Cosine > raw inner product, per the matrix-completion lesson.)
@@ -351,13 +351,13 @@ A sample = (user $\mathbf{a}$, positive item $\mathbf{b}^+$, negative item $\mat
 **Triplet hinge loss:**
 
 $$
-L(\mathbf{a}, \mathbf{b}^+, \mathbf{b}^-) = \max\{0,\; \cos(\mathbf{a}, \mathbf{b}^-) + m - \cos(\mathbf{a}, \mathbf{b}^+)\}.
+L(\mathbf{a}, \mathbf{b}^+, \mathbf{b}^-) = \max\lbrace0, \cos(\mathbf{a}, \mathbf{b}^-) + m - \cos(\mathbf{a}, \mathbf{b}^+)\rbrace.
 $$
 
 **Triplet logistic loss** ($\sigma$ a scaling hyperparameter):
 
 $$
-L(\mathbf{a}, \mathbf{b}^+, \mathbf{b}^-) = \log\!\Big(1 + \exp\big[\sigma \cdot (\cos(\mathbf{a}, \mathbf{b}^-) - \cos(\mathbf{a}, \mathbf{b}^+))\big]\Big).
+L(\mathbf{a}, \mathbf{b}^+, \mathbf{b}^-) = \log\Big(1 + \exp\big[\sigma \cdot (\cos(\mathbf{a}, \mathbf{b}^-) - \cos(\mathbf{a}, \mathbf{b}^+))\big]\Big).
 $$
 
 #### Listwise Training
@@ -517,7 +517,7 @@ A batch has $n$ positive (clicked) pairs $(\mathbf{a}_1, \mathbf{b}_1), \dots, (
 With the sampling-bias correction (subtract $\log p_j$ inside the softmax), the main loss for user $i$ is:
 
 $$
-L_{\text{main}}[i] = -\log\!\left( \frac{\exp\big(\cos(\mathbf{a}_i, \mathbf{b}_i) - \log p_i\big)}{\sum_{j=1}^{n} \exp\big(\cos(\mathbf{a}_i, \mathbf{b}_j) - \log p_j\big)} \right),
+L_{\text{main}}[i] = -\log\left( \frac{\exp\big(\cos(\mathbf{a}_i, \mathbf{b}_i) - \log p_i\big)}{\sum_{j=1}^{n} \exp\big(\cos(\mathbf{a}_i, \mathbf{b}_j) - \log p_j\big)} \right),
 $$
 
 and we minimize $\frac{1}{n}\sum_{i=1}^{n} L_{\text{main}}[i]$.
@@ -532,15 +532,15 @@ This is contrastive learning over items — no user clicks needed, hence "self-s
 
 ### 9.4 Four Feature Transformations (特征变换)
 
-1. **Random Mask:** randomly pick some discrete features and mask them. e.g., category $\mathcal{U}=\{\text{digital}, \text{photography}\}$ → masked $\mathcal{U}'=\{\text{default}\}$.
+1. **Random Mask:** randomly pick some discrete features and mask them. e.g., category $\mathcal{U}=\lbrace\text{digital}, \text{photography}\rbrace$ → masked $\mathcal{U}'=\lbrace\text{default}\rbrace$.
 
-2. **Dropout (multi-valued discrete features only):** an item can have multiple categories (a multi-valued discrete feature). Randomly drop 50% of the values. e.g., $\mathcal{U}=\{\text{beauty}, \text{photography}\}$ → $\mathcal{U}'=\{\text{beauty}\}$.
+2. **Dropout (multi-valued discrete features only):** an item can have multiple categories (a multi-valued discrete feature). Randomly drop 50% of the values. e.g., $\mathcal{U}=\lbrace\text{beauty}, \text{photography}\rbrace$ → $\mathcal{U}'=\lbrace\text{beauty}\rbrace$.
 
 3. **Complementary features (互补特征):** suppose 4 features {ID, category, keyword, city}. Randomly split into two groups, e.g., {ID, keyword} and {category, city}. View 1 = {ID, default, keyword, default}; view 2 = {default, category, default, city}. Encourage the two resulting vectors to be similar.
 
 4. **Mask a group of correlated features:** mask features that tend to co-occur, measured by **mutual information (互信息)**.
-   - $p(u)$ = probability a feature takes value $u$ (e.g., $p(\text{male})=20\%$, $p(\text{female})=30\%$, $p(\text{neutral})=50\%$).
-   - $p(u,v)$ = joint probability that one feature = $u$ and another = $v$ (e.g., $p(\text{female}, \text{beauty})=3\%$ vs $p(\text{female}, \text{digital})=0.1\%$).
+   - $p(u)$ = probability a feature takes value $u$ (e.g., $p(\text{male})=20$%, $p(\text{female})=30$%, $p(\text{neutral})=50$%).
+   - $p(u,v)$ = joint probability that one feature = $u$ and another = $v$ (e.g., $p(\text{female}, \text{beauty})=3$% vs $p(\text{female}, \text{digital})=0.1$%).
    - **Mutual information** between feature sets $\mathcal{U}, \mathcal{V}$:
      $$
      MI(\mathcal{U}, \mathcal{V}) = \sum_{u \in \mathcal{U}} \sum_{v \in \mathcal{V}} p(u,v) \cdot \log \frac{p(u,v)}{p(u)\cdot p(v)}.
@@ -553,7 +553,7 @@ This is contrastive learning over items — no user clicks needed, hence "self-s
 Uniformly sample $m$ items from the **whole corpus** as a batch (uniform, *not* click-weighted). Apply two transformations → two vector groups $\mathbf{b}_1', \dots, \mathbf{b}_m'$ and $\mathbf{b}_1'', \dots, \mathbf{b}_m''$. Self-supervised loss for item $i$ (softmax + cross-entropy, positive = same item's other view):
 
 $$
-L_{\text{self}}[i] = -\log\!\left( \frac{\exp\big(\cos(\mathbf{b}_i', \mathbf{b}_i'')\big)}{\sum_{j=1}^{m} \exp\big(\cos(\mathbf{b}_i', \mathbf{b}_j'')\big)} \right).
+L_{\text{self}}[i] = -\log\left( \frac{\exp\big(\cos(\mathbf{b}_i', \mathbf{b}_i'')\big)}{\sum_{j=1}^{m} \exp\big(\cos(\mathbf{b}_i', \mathbf{b}_j'')\big)} \right).
 $$
 
 ### 9.6 Combined Training
@@ -561,7 +561,7 @@ $$
 Sample $n$ click pairs (for $L_{\text{main}}$) and $m$ uniform items (for $L_{\text{self}}$), and minimize the combined objective:
 
 $$
-\frac{1}{n}\sum_{i=1}^{n} L_{\text{main}}[i] \;+\; \alpha \cdot \frac{1}{m}\sum_{j=1}^{m} L_{\text{self}}[j],
+\frac{1}{n}\sum_{i=1}^{n} L_{\text{main}}[i] + \alpha \cdot \frac{1}{m}\sum_{j=1}^{m} L_{\text{self}}[j],
 $$
 
 where $\alpha$ weights the self-supervised term. **Note the two batches differ:** $L_{\text{main}}$ uses click data (popularity-weighted); $L_{\text{self}}$ uses uniformly-sampled items (so long-tail items get equal representation).
@@ -583,7 +583,7 @@ References: Weihao Gao et al., *Learning A Retrievable Structure for Large-Scale
 
 ### 10.2 Item ↔ Path Structure & Indices
 
-Imagine a structure of `depth = 3` layers (L1, L2, L3), each of `width = K` nodes. A **path** is one node per layer, e.g., $[2, 4, 1]$. One item can map to **multiple** paths, e.g., $\{[2,4,1], [4,1,1]\}$.
+Imagine a structure of `depth = 3` layers (L1, L2, L3), each of `width = K` nodes. A **path** is one node per layer, e.g., $[2, 4, 1]$. One item can map to **multiple** paths, e.g., $\lbrace[2,4,1], [4,1,1]\rbrace$.
 
 Two indices (analogous to ItemCF's two indices):
 - **item → List⟨path⟩**: each item maps to several paths (a path is 3 nodes $[a,b,c]$).
@@ -631,7 +631,7 @@ Training data: (1) the **item → path** index, (2) users' clicked items. Positi
 **(a) Learn neural-network parameters.** An item is represented by $J$ paths $[a_1,b_1,c_1], \dots, [a_J, b_J, c_J]$. If the user clicked the item, the user is interested in all $J$ of its paths. So we increase $\sum_{j=1}^{J} p(a_j, b_j, c_j \mid \mathbf{x})$:
 
 $$
-\text{loss} = -\log\!\left( \sum_{j=1}^{J} p(a_j, b_j, c_j \mid \mathbf{x}) \right).
+\text{loss} = -\log\left( \sum_{j=1}^{J} p(a_j, b_j, c_j \mid \mathbf{x}) \right).
 $$
 
 **(b) Learn item representations (item → paths).** Define the user's interest in a path as $p(\text{path}\mid\text{user}) = p(a,b,c\mid\mathbf{x})$. The **relevance** of item and path:
@@ -640,19 +640,19 @@ $$
 \text{score}(\text{item}, \text{path}) = \sum_{\text{user}} p(\text{path} \mid \text{user}) \times \text{click}(\text{user}, \text{item}),
 $$
 
-i.e., sum over users of (user's interest in the path) × (did the user click the item, 0/1). Select $J$ paths $\Pi = \{\text{path}_1, \dots, \text{path}_J\}$ as the item's representation.
+i.e., sum over users of (user's interest in the path) × (did the user click the item, 0/1). Select $J$ paths $\Pi = \lbrace\text{path}_1, \dots, \text{path}_J\rbrace$ as the item's representation.
 
 - **Loss** (pick paths highly relevant to the item):
   $$
-  \text{loss}(\text{item}, \Pi) = -\log\!\left( \sum_{j=1}^{J} \text{score}(\text{item}, \text{path}_j) \right).
+  \text{loss}(\text{item}, \Pi) = -\log\left( \sum_{j=1}^{J} \text{score}(\text{item}, \text{path}_j) \right).
   $$
 - **Regularization** (avoid too many items piling onto one path):
   $$
   \text{reg}(\text{path}_j) = \big(\text{number of items on } \text{path}_j\big)^4.
   $$
-- **Greedy path update:** holding the other paths $\{\text{path}_i\}_{i\ne l}$ fixed, pick a new $\text{path}_l$ from the unused paths:
+- **Greedy path update:** holding the other paths $\lbrace\text{path}_i\rbrace_{i\ne l}$ fixed, pick a new $\text{path}_l$ from the unused paths:
   $$
-  \text{path}_l \leftarrow \arg\min_{\text{path}_l} \; \text{loss}(\text{item}, \Pi) + \alpha \cdot \text{reg}(\text{path}_l).
+  \text{path}_l \leftarrow \arg\min_{\text{path}_l}  \text{loss}(\text{item}, \Pi) + \alpha \cdot \text{reg}(\text{path}_l).
   $$
   This selects a path with high $\text{score}(\text{item}, \text{path}_l)$ that isn't overcrowded.
 
@@ -759,7 +759,7 @@ Using more hash functions makes accidental "all bits set" less likely per item, 
 Let $n$ = size of the exposed-item set, $m$ = binary-vector dimension, $k$ = number of hash functions. The false-positive probability:
 
 $$
-\delta \approx \left( 1 - \exp\!\left( -\frac{kn}{m} \right) \right)^{k}.
+\delta \approx \left( 1 - \exp\left( -\frac{kn}{m} \right) \right)^{k}.
 $$
 
 - Larger $n$ → more 1s in the vector → higher false-positive rate (a fresh item's $k$ positions are more likely all-1).
@@ -769,7 +769,7 @@ $$
 Given a tolerable false-positive rate $\delta$ (e.g., 1%), the optimal parameters are:
 
 $$
-k = 1.44 \cdot \ln\!\left( \frac{1}{\delta} \right), \qquad m = 2n \cdot \ln\!\left( \frac{1}{\delta} \right).
+k = 1.44 \cdot \ln\left( \frac{1}{\delta} \right), \qquad m = 2n \cdot \ln\left( \frac{1}{\delta} \right).
 $$
 
 (Roughly: $m \approx 10n$ bits per user suffices to push $\delta$ below 1%.)
@@ -801,7 +801,7 @@ exposure-filter service  ◀── (write) ── real-time stream processing
 
 - **Sources used:** the twelve slide PDFs `02_Retrieval_01..12.pdf` (treated as ground truth) plus the twelve AI-transcribed Chinese audio files (supplementary). The slides and audio are consistent throughout; no substantive contradictions were found.
 - **Audio transcription artifacts** (corrected against the slides): the AI transcription frequently garbles Chinese book titles and terms — e.g., 《鹿鼎记》 ("The Deer and the Cauldron") appears as "鹿岭记/露顶记/露顶记," and "买点" (tracking/埋点) is a homophone error for "埋点." These do not affect the technical content. The math (similarity formulas, triplet/softmax losses, sampling-bias correction $-\log p_i$, Bloom-filter $\delta$ and optimal $k, m$) is taken verbatim from the slides.
-- **Minor numbers** that are illustrative (not load-bearing): ItemCF scale ($n=200$, $k=10$, $nk=2000$); pointwise positive:negative ratio $1:2$–$1:3$; sampling exponent $0.75$ (empirical); cache eviction (≤10 retrievals, ≤3 days, top-50 cached); Bloom-filter $m\approx10n$ for $\delta<1\%$ — all stated identically in slides and audio.
+- **Minor numbers** that are illustrative (not load-bearing): ItemCF scale ($n=200$, $k=10$, $nk=2000$); pointwise positive:negative ratio $1:2$–$1:3$; sampling exponent $0.75$ (empirical); cache eviction (≤10 retrievals, ≤3 days, top-50 cached); Bloom-filter $m\approx10n$ for $\delta<1$% — all stated identically in slides and audio.
 
 ---
 

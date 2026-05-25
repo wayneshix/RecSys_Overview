@@ -50,7 +50,7 @@ $$
 To add **second-order cross features** (二阶交叉特征) we let every *pair* of features multiply, each pair getting its own weight $u_{ij}$:
 
 $$
-p = b + \sum_{i=1}^{d} w_i x_i + \sum_{i=1}^{d} \sum_{j=i+1}^{d} u_{ij}\, x_i x_j
+p = b + \sum_{i=1}^{d} w_i x_i + \sum_{i=1}^{d} \sum_{j=i+1}^{d} u_{ij} x_i x_j
 $$
 
 The cross term $x_i x_j$ is nonzero only when both features fire, so $u_{ij}$ learns the interaction strength of that specific pair.
@@ -74,7 +74,7 @@ $$
 The **Factorized Machine** prediction is therefore:
 
 $$
-\boxed{\,p = b + \sum_{i=1}^{d} w_i x_i + \sum_{i=1}^{d} \sum_{j=i+1}^{d} \left(\mathbf{v}_i^T \mathbf{v}_j\right) x_i x_j\,}
+\boxed{p = b + \sum_{i=1}^{d} w_i x_i + \sum_{i=1}^{d} \sum_{j=i+1}^{d} \left(\mathbf{v}_i^T \mathbf{v}_j\right) x_i x_j}
 $$
 
 - Parameter count drops from $O(d^2)$ to $O(kd)$ — linear in $d$.
@@ -117,7 +117,7 @@ Internally:
 The cross-layer update (this is the **Cross Network V2 / DCN-V2** form on the slides) is:
 
 $$
-\boxed{\,\mathbf{x}_{i+1} = \mathbf{x}_0 \circ \big(\mathbf{W}\,\mathbf{x}_i + \mathbf{b}\big) + \mathbf{x}_i\,}
+\boxed{\mathbf{x}_{i+1} = \mathbf{x}_0 \circ \big(\mathbf{W}\mathbf{x}_i + \mathbf{b}\big) + \mathbf{x}_i}
 $$
 
 where $\circ$ is the Hadamard product and $\mathbf{W}, \mathbf{b}$ are that layer's parameters.
@@ -125,7 +125,7 @@ where $\circ$ is the Hadamard product and $\mathbf{W}, \mathbf{b}$ are that laye
 Using the task's requested notation (per-layer subscripts):
 
 $$
-\mathbf{x}_{l+1} = \mathbf{x}_0 \,\mathbf{x}_l^T \mathbf{w}_l + \mathbf{b}_l + \mathbf{x}_l
+\mathbf{x}_{l+1} = \mathbf{x}_0 \mathbf{x}_l^T \mathbf{w}_l + \mathbf{b}_l + \mathbf{x}_l
 $$
 
 > **Note on two DCN formulations.** Wang's slides teach **DCN-V2**, where the per-layer transform is a full **matrix** $\mathbf{W}$ (so $\mathbf{W}\mathbf{x}_i$ is a matrix-vector product). The *original* DCN-V1 (Wang et al., ADKDD 2017) uses a **weight vector** $\mathbf{w}_l$, giving $\mathbf{x}_{l+1} = \mathbf{x}_0 (\mathbf{x}_l^T \mathbf{w}_l) + \mathbf{b}_l + \mathbf{x}_l$, where $\mathbf{x}_l^T \mathbf{w}_l$ is a scalar. The task prompt's formula $x_{l+1} = x_0 x_l^T w_l + b_l + x_l$ is the **V1** form; the slide diagram (with a square matrix $\mathbf{W}$) is the **V2** form. Both share the same intuition: multiply $\mathbf{x}_0$ element-wise by a learned transform of $\mathbf{x}_l$, then add a residual.
@@ -194,7 +194,7 @@ LHUC interleaves two pathways:
 At each gating point, the main vector and the gating vector (which must have identical shape) are combined with a **Hadamard product** (element-wise multiply):
 
 $$
-\mathbf{h}_{\text{out}} = \mathbf{h}_{\text{main}} \;\circ\; \big(2\cdot\sigma(\text{gate-net}(\mathbf{u}))\big)
+\mathbf{h}_{\text{out}} = \mathbf{h}_{\text{main}} \circ \big(2\cdot\sigma(\text{gate-net}(\mathbf{u}))\big)
 $$
 
 Because each gate value is in $(0, 2)$, this **amplifies some hidden units (>1) and shrinks others (<1)** in a per-user (or per-speaker) way — hence "learning hidden unit *contributions*." The output keeps the same shape as the input.
@@ -268,14 +268,14 @@ Both inner and Hadamard products **require the two embeddings to have the same s
 
 **Inner-product form:**
 $$
-\boxed{\,f_{ij} = \mathbf{x}_i^T \,\mathbf{W}_{ij}\, \mathbf{x}_j\,} \quad (\text{a scalar})
+\boxed{f_{ij} = \mathbf{x}_i^T \mathbf{W}_{ij} \mathbf{x}_j} \quad (\text{a scalar})
 $$
 - $m$ fields → $m^2$ scalar cross features (fine, small).
 - But you need many $\mathbf{W}_{ij}$ matrices: $\approx \frac{m^2}{2}$ of them. With $\sim 1000$ matrices each $64\times64$, that is $\sim 4$ million parameters — large. To control this, **manually specify which important, related field pairs to cross** rather than crossing all pairs.
 
 **Hadamard-product form** (replace the final inner product with a Hadamard product):
 $$
-\boxed{\,\mathbf{f}_{ij} = \mathbf{x}_i \circ \big(\mathbf{W}_{ij}\, \mathbf{x}_j\big)\,} \quad (\text{a vector})
+\boxed{\mathbf{f}_{ij} = \mathbf{x}_i \circ \big(\mathbf{W}_{ij} \mathbf{x}_j\big)} \quad (\text{a vector})
 $$
 - First compute $\mathbf{W}_{ij}\mathbf{x}_j$ (a vector), then Hadamard with $\mathbf{x}_i$.
 - $m$ fields → $m^2$ vectors. Concatenating all of them gives an enormous, mostly-useless vector — again, **hand-pick a subset of pairs** to both shrink the output and cut parameters.
@@ -310,7 +310,7 @@ continuous features ──(transform)──────────────�
 |---|---|---|---|---|
 | **Linear** | $b + \sum w_i x_i$ | weighted sum, no crossing | $O(d)$ | baseline |
 | **FM** | $b + \sum w_i x_i + \sum_{i<j}(\mathbf{v}_i^T\mathbf{v}_j)x_i x_j$ | 2nd-order cross via low-rank | $O(kd)$ vs $O(d^2)$ | LR/LogReg replacement |
-| **DCN cross layer** | $\mathbf{x}_{i+1}=\mathbf{x}_0\circ(\mathbf{W}\mathbf{x}_i+\mathbf{b})+\mathbf{x}_i$ | explicit bounded-degree cross + residual | $O(L\,d)$ (V1) | shared bottom / tower / expert |
+| **DCN cross layer** | $\mathbf{x}_{i+1}=\mathbf{x}_0\circ(\mathbf{W}\mathbf{x}_i+\mathbf{b})+\mathbf{x}_i$ | explicit bounded-degree cross + residual | $O(Ld)$ (V1) | shared bottom / tower / expert |
 | **DCN (full)** | deep MLP ‖ cross net → concat → FC | explicit + implicit crosses | — | ranking & retrieval backbone |
 | **LHUC / PPNet** | $\mathbf{h}\circ(2\sigma(\text{gate}(\mathbf{u})))$ | per-user multiplicative gating (Sigmoid×2 ∈ (0,2)) | small | ranking only |
 | **SENet** | AvgPool → FC+ReLU → FC+Sigmoid → row-wise mult | field-wise importance reweighting ($w\in(0,1)^m$) | $O(m^2/r)$ | ranking |
@@ -419,7 +419,7 @@ The classic methods above bake in **fixed, explicit crosses**: FM enumerates sec
 
 > Wang, F., Yang, G., Zhou, X., Yang, S., & Wang, P. (2026). *Query-mixed interest extraction and heterogeneous interaction: A scalable CTR model for industrial recommender systems*. arXiv. https://arxiv.org/abs/2602.09387
 
-**Method.** Two parts. **Query-Mixed Interest Extraction** uses two groups of **learnable query tokens** (Q-Former / BLIP-2 style), $Q=[Q_G, Q_R]$, to extract **context-independent (global/long-term)** and **context-aware (real-time)** interests from the behavior sequences. **HeteroMixer** is a self-attention *replacement* following an **"interact-then-split"** paradigm: first apply an implicit high-order **bit-wise interaction** across all features, *then* **split** NS tokens for global vs. real-time sequence groups — opposite to OneTrans' split-then-merge, preserving semantic boundaries. It uses a **low-rank MLP token mixer** $\hat G_m = W^R_m\,\mathrm{ReLU}(W^L_m G_m)$ with rank $d_r \ll N\!\cdot\! d_h$ for cheap multi-granularity interaction.
+**Method.** Two parts. **Query-Mixed Interest Extraction** uses two groups of **learnable query tokens** (Q-Former / BLIP-2 style), $Q=[Q_G, Q_R]$, to extract **context-independent (global/long-term)** and **context-aware (real-time)** interests from the behavior sequences. **HeteroMixer** is a self-attention *replacement* following an **"interact-then-split"** paradigm: first apply an implicit high-order **bit-wise interaction** across all features, *then* **split** NS tokens for global vs. real-time sequence groups — opposite to OneTrans' split-then-merge, preserving semantic boundaries. It uses a **low-rank MLP token mixer** $\hat G_m = W^R_m\mathrm{ReLU}(W^L_m G_m)$ with rank $d_r \ll N\cdot d_h$ for cheap multi-granularity interaction.
 
 **Key results.** Favorable parameter-scaling; deployed on AMAP with **+3.61% GMV, +2.78% PV_CTR, +2.12% UV_CVR** over DLRM (abstract figures; the body also reports +0.61% GMV / +2.32% PV_CTR / +0.81% UV_CVR on another A/B).
 

@@ -70,8 +70,8 @@ The vector $\mathbf{x}$ to be quantized usually comes from:
 The dominant tokenizer is **RQ-VAE (Residual-Quantized VAE)** (used in TIGER). It is a **multi-level / coarse-to-fine** quantizer:
 
 1. Encode the item to a latent $\mathbf{z}$.
-2. **Level 1:** pick the nearest codebook-1 entry $c_1 = \arg\min_k \|\mathbf{z} - \mathbf{e}^{(1)}_k\|$; compute the **residual** $\mathbf{r}_1 = \mathbf{z} - \mathbf{e}^{(1)}_{c_1}$.
-3. **Level 2:** quantize the residual against codebook-2: $c_2 = \arg\min_k \|\mathbf{r}_1 - \mathbf{e}^{(2)}_k\|$; residual $\mathbf{r}_2 = \mathbf{r}_1 - \mathbf{e}^{(2)}_{c_2}$.
+2. **Level 1:** pick the nearest codebook-1 entry $c_1 = \arg\min_k \Vert\mathbf{z} - \mathbf{e}^{(1)}_k\Vert$; compute the **residual** $\mathbf{r}_1 = \mathbf{z} - \mathbf{e}^{(1)}_{c_1}$.
+3. **Level 2:** quantize the residual against codebook-2: $c_2 = \arg\min_k \Vert\mathbf{r}_1 - \mathbf{e}^{(2)}_k\Vert$; residual $\mathbf{r}_2 = \mathbf{r}_1 - \mathbf{e}^{(2)}_{c_2}$.
 4. Repeat for $L$ levels. The code $[c_1, \dots, c_L]$ approximates $\mathbf{z} \approx \sum_\ell \mathbf{e}^{(\ell)}_{c_\ell}$.
 
 The result is a **coarse-to-fine hierarchy (粗到细层级)**: $c_1$ captures the broadest category, later codes refine. This hierarchy is exactly what makes the valid-item set a **prefix tree (trie, 前缀树)** (§3) and what reasoning methods exploit (§4).
@@ -102,7 +102,7 @@ $$
 P(\text{tok}(i_t) \mid u) = \prod_{\ell=1}^{L} P\big(c_\ell \mid c_{<\ell}, u\big),
 $$
 
-then maps the generated code $[c_1, \dots, c_L]$ back to the item(s) carrying it. **Beam search** over the $L$ steps yields the top-$k$ candidates — directly analogous to the **Deep Retrieval** path-decoding scheme already in [Note 02 §10](02_Candidate_Retrieval.md), where an item is a *path* $[a,b,c]$ scored as $p(a,b,c\mid\mathbf{x}) = p_1(a)\,p_2(b\mid a)\,p_3(c\mid a,b)$ and beam search finds the best paths. GR's semantic-ID decoding *is* Deep Retrieval generalized: the "path" is the semantic ID, and the codebook gives the paths *content meaning* (so the structure transfers to cold-start items) rather than being learned per-corpus from clicks alone.
+then maps the generated code $[c_1, \dots, c_L]$ back to the item(s) carrying it. **Beam search** over the $L$ steps yields the top-$k$ candidates — directly analogous to the **Deep Retrieval** path-decoding scheme already in [Note 02 §10](02_Candidate_Retrieval.md), where an item is a *path* $[a,b,c]$ scored as $p(a,b,c\mid\mathbf{x}) = p_1(a)p_2(b\mid a)p_3(c\mid a,b)$ and beam search finds the best paths. GR's semantic-ID decoding *is* Deep Retrieval generalized: the "path" is the semantic ID, and the codebook gives the paths *content meaning* (so the structure transfers to cold-start items) rather than being learned per-corpus from clicks alone.
 
 ### 3.2 Constrained (trie) decoding makes outputs valid
 
@@ -141,7 +141,7 @@ A test instance is a user history $u = [i_1, \dots, i_{t-1}]$ with ground-truth 
 **Memorization-related** — the model only needs to *recall* a pattern it saw verbatim. An instance is memorization-related iff the exact **1-hop transition** $[i_{t-1} \to i_t]$ appears in *some* training user's history:
 
 $$
-(u, i_t) \in \mathcal{D}_{\text{mem}} \iff \exists\, u' \in \mathcal{D}_{\text{train}} \ \text{s.t.}\ [i_{t-1} \to i_t] \subseteq u'.
+(u, i_t) \in \mathcal{D}_{\text{mem}} \iff \exists u' \in \mathcal{D}_{\text{train}} \ \text{s.t.}\ [i_{t-1} \to i_t] \subseteq u'.
 $$
 
 **Generalization-related** — *not* memorization-related, but the transition can be **inferred/composed** from observed ones:
@@ -159,7 +159,7 @@ The empirical result: **TIGER (GR) wins big on generalization subsets** (e.g. +5
 *Why* does GR generalize? The token-level lens: because GR tokenizes items into **shared semantic-ID tokens**, an item transition $[i_{t-1} \to i_t]$ that was *never seen at the item level* can still be **memorized at the token level** if the token *prefixes* of both endpoints co-occurred in training. The headline finding: **>99% of "item-level generalization" instances are actually 1-gram prefix-memorizable.** In other words:
 
 $$
-\text{item-level generalization (GR)} \;\approx\; \text{token-level memorization in semantic-ID space.}
+\text{item-level generalization (GR)} \approx \text{token-level memorization in semantic-ID space.}
 $$
 
 GR doesn't perform magic reasoning — it converts a hard item-level generalization problem into an easy token-level memorization problem, because similar items *share tokens*. That is the entire mechanistic explanation for the GR generalization advantage. And it directly connects to [Note 01 §4](01_Foundations_and_AB_Testing.md)'s funnel intuition: the corpus has hundreds of millions of items but any user has touched a handful, so most *useful* candidate→target transitions a 召回/精排 model must score were **never observed exactly** — they live in the generalization regime, exactly where shared-token GR shines.
