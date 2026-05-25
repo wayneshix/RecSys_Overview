@@ -29,7 +29,7 @@ Cold-start is widely regarded as the hardest, most complex part of a recommender
    - 8.4 [Quota Guarantee](#84-quota-guarantee)
    - 8.5 [Differentiated Quota Guarantee (差异化保量)](#85-differentiated-quota-guarantee)
 9. [Cold-Start A/B Testing (冷启的 AB 测试)](#9-cold-start-ab-testing)
-10. [Summary & Interview Checklist](#10-key-insights)
+10. [Key Insights](#10-key-insights)
 
 ---
 
