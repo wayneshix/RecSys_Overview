@@ -14,7 +14,7 @@ This is a conceptual/synthesis note. It does **not** re-derive the per-paper det
 4. [Custom GPU Kernels: GDPA](#4-custom-gpu-kernels-gdpa)
 5. [MoE Serving: Inference-Time Load Balancing](#5-moe-serving-inference-time-load-balancing)
 6. [The Efficiency Toolbox](#6-the-efficiency-toolbox)
-7. [Interview Cheat-Sheet](#7-key-insights)
+7. [Key Insights](#7-key-insights)
 8. [References](#8-references)
 
 ---
