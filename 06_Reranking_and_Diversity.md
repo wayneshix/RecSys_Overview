@@ -31,7 +31,7 @@
    - 6.6 [Sliding window + rules for DPP](#66-sliding-window--rules-for-dpp)
    - 6.7 [MGS — a simpler equivalent (bonus)](#67-mgs--a-simpler-equivalent-bonus)
 7. [Reward vs. Diversity Trade-off — Intuition Summary](#7-reward-vs-diversity-trade-off--intuition-summary)
-8. [Interview Cheat-Sheet](#8-key-insights)
+8.  [Key Insights](#8-key-insights)
 
 ---
 
