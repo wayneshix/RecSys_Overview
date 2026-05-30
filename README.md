@@ -64,4 +64,4 @@ Conceptual syntheses of the 2026 research wave. These are the homes for future p
 
 ## Acknowledgement
 
-The fundamentals (notes 01–08) are referenced from **Shusen Wang's ** class on youtube publicly available *Recommendation System* course, with modification, explanations, and frontier notes are written by me.
+The fundamentals (notes 01–08) are based on **Shusen Wang's (王树森)** publicly available *Recommendation System* course, with additions, the frontier notes, and all paper write-ups added by me.

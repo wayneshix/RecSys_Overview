@@ -7,35 +7,45 @@
 ## Table of Contents
 
 1. [What Metrics Matter and the General Strategy](#1-what-metrics-matter-and-the-general-strategy)
-   - 1.1 [Core metrics: DAU and retention (LT7 / LT30)](#11-core-metrics-dau-and-retention-lt7--lt30)
-   - 1.2 [Secondary core metrics and non-core metrics](#12-secondary-core-metrics-and-non-core-metrics)
-   - 1.3 [The five-part playbook](#13-the-five-part-playbook)
-2. [Retrieval Improvements](#2-retrieval-improvements-召回)
-   - 2.1 [Retrieval channels and the fixed quota](#21-retrieval-channels-and-the-fixed-quota)
-   - 2.2 [Improving the two-tower model](#22-improving-the-two-tower-model)
-   - 2.3 [Item-to-Item (I2I) and its relatives](#23-item-to-item-i2i-and-its-relatives)
-   - 2.4 [Niche retrieval models](#24-niche-retrieval-models)
-3. [Ranking-Model Improvements](#3-ranking-model-improvements-排序模型)
-   - 3.1 [Improving the fine-rank model](#31-improving-the-fine-rank-model)
-   - 3.2 [Improving the pre-rank model and rank-consistency distillation](#32-improving-the-pre-rank-model-and-rank-consistency-distillation)
-   - 3.3 [User behavior-sequence modeling](#33-user-behavior-sequence-modeling)
-   - 3.4 [Online learning](#34-online-learning)
-   - 3.5 [The "old-soup" model problem](#35-the-old-soup-model-problem-老汤模型)
-4. [Diversity Improvements](#4-diversity-improvements-多样性)
-   - 4.1 [Fine-rank diversity](#41-fine-rank-diversity)
-   - 4.2 [Pre-rank diversity](#42-pre-rank-diversity)
-   - 4.3 [Retrieval diversity](#43-retrieval-diversity)
-   - 4.4 [Exploration traffic](#44-exploration-traffic)
-5. [Special Treatment of Special User Populations](#5-special-treatment-of-special-user-populations-特殊人群)
-   - 5.1 [Why treat them specially](#51-why-treat-them-specially)
-   - 5.2 [Special content pools](#52-special-content-pools)
-   - 5.3 [Special ranking strategies](#53-special-ranking-strategies)
-   - 5.4 [Differentiated ranking models (and a cautionary tale)](#54-differentiated-ranking-models-and-a-cautionary-tale)
-6. [Leveraging Interaction Behaviors](#6-leveraging-interaction-behaviors-利用交互行为)
-   - 6.1 [Follow](#61-follow)
-   - 6.2 [Forward / Share](#62-forward--share)
-   - 6.3 [Comment](#63-comment)
-7. [Interview Cheat-Sheet](#7-key-insights)
+   - [1.1 Core metrics: DAU and retention (LT7 / LT30)](#11-core-metrics-dau-and-retention-lt7--lt30)
+   - [1.2 Secondary core metrics and non-core metrics](#12-secondary-core-metrics-and-non-core-metrics)
+   - [1.3 The five-part playbook](#13-the-five-part-playbook)
+2. [Retrieval Improvements (召回)](#2-retrieval-improvements-召回)
+   - [2.1 Retrieval channels and the fixed quota](#21-retrieval-channels-and-the-fixed-quota)
+   - [2.2 Improving the two-tower model](#22-improving-the-two-tower-model)
+   - [2.3 Item-to-Item (I2I) and its relatives](#23-item-to-item-i2i-and-its-relatives)
+   - [2.4 Niche retrieval models](#24-niche-retrieval-models)
+3. [Ranking-Model Improvements (排序模型)](#3-ranking-model-improvements-排序模型)
+   - [3.1 Improving the fine-rank model](#31-improving-the-fine-rank-model)
+   - [3.2 Improving the pre-rank model and rank-consistency distillation](#32-improving-the-pre-rank-model-and-rank-consistency-distillation)
+   - [3.3 User behavior-sequence modeling](#33-user-behavior-sequence-modeling)
+   - [3.4 Online learning](#34-online-learning)
+   - [3.5 The "old-soup" model problem (老汤模型)](#35-the-old-soup-model-problem-老汤模型)
+4. [Diversity Improvements (多样性)](#4-diversity-improvements-多样性)
+   - [4.1 Fine-rank diversity](#41-fine-rank-diversity)
+   - [4.2 Pre-rank diversity](#42-pre-rank-diversity)
+   - [4.3 Retrieval diversity](#43-retrieval-diversity)
+   - [4.4 Exploration traffic](#44-exploration-traffic)
+5. [Special Treatment of Special User Populations (特殊人群)](#5-special-treatment-of-special-user-populations-特殊人群)
+   - [5.1 Why treat them specially](#51-why-treat-them-specially)
+   - [5.2 Special content pools](#52-special-content-pools)
+   - [5.3 Special ranking strategies](#53-special-ranking-strategies)
+   - [5.4 Differentiated ranking models (and a cautionary tale)](#54-differentiated-ranking-models-and-a-cautionary-tale)
+6. [Leveraging Interaction Behaviors (利用交互行为)](#6-leveraging-interaction-behaviors-利用交互行为)
+   - [6.1 Follow](#61-follow)
+   - [6.2 Forward / Share](#62-forward--share)
+   - [6.3 Comment](#63-comment)
+7. [Key Insights](#7-key-insights)
+8. [Frontier Directions (2026): The Generative-Recommendation Era](#frontier-directions-2026-the-generative-recommendation-era)
+   - [1. Generative Recommendation & semantic IDs](#1-generative-recommendation--semantic-ids)
+   - [2. Scaling laws & unified Transformers](#2-scaling-laws--unified-transformers)
+   - [3. Lifelong / ultra-long sequence modeling](#3-lifelong--ultra-long-sequence-modeling)
+   - [4. LLM reasoning & agentic recsys](#4-llm-reasoning--agentic-recsys)
+   - [5. Generative retrieval & serving efficiency](#5-generative-retrieval--serving-efficiency)
+   - [6. Industrial foundation-model lessons](#6-industrial-foundation-model-lessons)
+   - [Cross-references](#cross-references)
+9. [Pinterest in Practice (2024–2026)](#pinterest-in-practice-20242026)
+   - [LLM Relevance Judge + Stratified Sampling — when the win is the *measurement*, not the model](#llm-relevance-judge--stratified-sampling--when-the-win-is-the-measurement-not-the-model)
 
 ---
 
@@ -432,62 +442,44 @@ where $w_i$ is a weight **negatively correlated** with item $i$'s existing comme
 
 ## Frontier Directions (2026): The Generative-Recommendation Era
 
-The five-part playbook above is the *operating system* of a modern feed recsys — and it is not going away. But the 2026 research wave reshapes **how each lever is implemented under the hood**. The throughline is **Generative Recommendation (GR, 生成式推荐)** and **scaling laws (规模定律)**: the field is converging on the bet that, like LLMs, recsys models get monotonically better with parameters/compute *if* the architecture and serving stack are designed for it. Below is a strategic overlay mapping the six dominant themes onto "how do I actually move the metrics?", with the key trade-off for each. (Unlike the rest of this chapter, this is a pointer-level synthesis — the per-paper depth lives in the **Expanded Reading** sections of Parts 01–07.)
+The five-part playbook above is the *operating system* of a modern feed recsys, and it is not going away. But the 2026 research wave reshapes **how each lever is implemented under the hood**. The throughline is **generative recommendation (GR, 生成式推荐)** and **scaling laws (规模定律)** — like LLMs, recsys models get monotonically better with parameters/compute *if* the architecture and serving stack are designed for it. Below is a strategic overlay mapping the six dominant themes onto "how do I actually move the metrics?", with the key trade-off for each. **This is intentionally a pointer-level synthesis — the conceptual depth and full bibliographies live in the dedicated frontier Notes 09–12, and the per-paper Expanded Reading sections of Notes 01–07.**
 
-### 1. Generative Recommendation & semantic IDs (生成式推荐与语义 ID)
+### 1. Generative Recommendation & semantic IDs
 
-The headline shift is replacing the **item ID (物品 ID)** — a raw, memorized atom with no shared structure — with **semantic IDs / semantic tokens (语义 ID / 语义 token)**: each item becomes a short sequence of tokens derived from its content (often via RQ-Kmeans residual quantization). Because two different items can now share a token prefix, the model can **generalize** to (user, item) transitions it never literally saw in training — formalized as "item-level generalization ≈ token-level memorization within the semantic-ID space" (Meta, 2026). The catch is the **memorization-vs-generalization trade-off (记忆 vs. 泛化)**: naively swapping in semantic IDs *drops* performance, because content tokens carry no **collaborative-filtering (协同过滤)** signal and you lose the sheer memorization power of unique item IDs. The production fix (ByteDance TRM, 2026) is to (a) make tokens **CF-aware** by training on engagement-based query–item / item–item pairs plus in-batch negatives, and (b) keep *both* original tokens (for generalization) and BPE-merged tokens (for memorization). **So what for metrics:** semantic IDs are the single biggest unlock for **cold-start and long-tail items (冷启动 / 长尾物品)** — exactly the items that, in §2.2, motivated self-supervised two-tower embeddings — because content tokens give them a warm start before they accumulate clicks. **Trade-off:** you sacrifice some head-item precision (pure memorization) to buy tail generalization, so the win shows up in coverage/diversity and tail CTR, not necessarily in head-traffic AUC.
+Replace the item-ID embedding with a short sequence of shared semantic tokens (typically via RQ-VAE / RQ-Kmeans / FSQ residual quantization), so two items can share a prefix and the model can generalize to (user, item) transitions it never literally saw in training. **So what for metrics:** the biggest unlock is **cold-start and long-tail coverage** — content tokens give new items a warm start no ID embedding can. **Trade-off:** denser tokenization buys generalization at the cost of head-item memorization, so the win lands in tail CTR / coverage rather than head-traffic AUC; naive ID→semantic swaps *degrade* unless tokens are made CF-aware (ByteDance TRM). → Full treatment in **[Note 09 — Generative Recommendation & Semantic IDs](09_Generative_Recommendation_and_Semantic_IDs.md)**.
 
-### 2. Scaling laws & unified feature-interaction + sequence Transformers (规模定律与统一架构)
+### 2. Scaling laws & unified Transformers
 
-The classic fine-rank "base" of §3.1 — DCN / bilinear crosses over concatenated embeddings — is being replaced by **Transformer backbones that jointly scale feature interaction and sequence modeling**, the OneTrans / HyFormer / MixFormer / TokenMixer-Large / InterFormer / Kunlun / EST / HeMix wave of 2026. The central architectural debate is **encode-then-interaction vs. unified (先编码后交互 vs. 统一建模)**: the old recipe compresses the user sequence into a static vector and *then* feeds it to interaction layers, whereas the unified approach tokenizes both sequence (S) and non-sequence (NS) features into one stream so they co-attend and co-scale (OneTrans, 2025). Later work argues the truly load-bearing signal is the **S–NS cross-attention** (Alibaba EST), or that merging heterogeneous sequences into one stream actually hurts (HyFormer/MixFormer critiques). But the real bottleneck — and the reason vanilla HSTU did not ship while ULTRA-HSTU did — is **efficiency, not accuracy**: **MFU (model-flops utilization)**, **KV-cache (KV 缓存)** reuse for request-invariant user-side tokens, and **sliding-window / semi-local attention (滑窗注意力)** to escape $O(L^2)$ cost. Kunlun (Meta, 2026) raised MFU from 17% → 37% and doubled scaling efficiency precisely through such kernel/architecture co-design. **So what for metrics:** this is the modern version of §3.1's "widen & deepen" — the same underfitting argument (FC nets are tiny; >99% of params are embeddings), now answered with billions of *dense* parameters that actually pay off because the architecture scales. **Trade-off:** every accuracy gain is gated by serving FLOPs/latency, so the engineering question is "what AUC per MFU-point?" rather than "what AUC?".
+The DCN-on-concatenated-embeddings fine-rank "base" of §3.1 is being replaced by Transformer backbones that **jointly scale feature interaction and sequence modeling** — the OneTrans / Kunlun / HyFormer / MixFormer / TokenMixer-Large / InterFormer / EST / HeMix wave. The headline debate is *encode-then-interaction vs. unified modeling*, but the real bottleneck is efficiency, not accuracy: **MFU**, **KV-cache** reuse for request-invariant user-side tokens, and **sliding-window / semi-local attention** decide what actually ships (Kunlun took MFU from 17%→37%, ULTRA-HSTU shipped where vanilla HSTU couldn't). **So what for metrics:** the modern version of §3.1's "widen & deepen" — billions of dense parameters that finally scale because the architecture is built for it. **Trade-off:** every AUC gain is paid in serving FLOPs/latency. → **[Note 10 — Scaling Laws & Large-Model Architectures](10_Scaling_Laws_and_Large_Model_Architectures.md)** for the architectures; **[Note 12](12_Serving_and_Inference_Efficiency.md)** for the serving stack.
 
-### 3. Lifelong / ultra-long sequence modeling (终身 / 超长序列建模)
+### 3. Lifelong / ultra-long sequence modeling
 
-This is the direct successor to the SIM recipe of §3.3 (long raw sequence → filter → DIN attention) and to Kuaishou's >1M-item sequences. The 2026 framing (Kuaishou lifelong-behavior survey, 2026) cleanly partitions the design space into three strategies: **search-based (检索式)** — retrieve only the candidate-relevant subset from the lifelong history (the SIM lineage); **compression-based (压缩式)** — summarize the whole history into fixed-size state (pooling, clustering, learnable query tokens); and **hybrid (混合式)**. QARM V2 (Kuaishou, 2026) pushes the multimodal-alignment angle, aligning quantized content representations with the reasoning over user sequences. **So what for metrics:** once ranking and short-sequence modeling are mature, lifelong modeling is the **main remaining lever** (as §3.3 already states) — it recovers stale-but-real interests that short windows drop. **Trade-off:** search-based methods are accurate but add online retrieval latency per candidate; compression-based methods are cheap and candidate-invariant (cacheable) but lossy — the same length-vs-compute tension §3.3 raised, now named explicitly.
+Direct successor to SIM (Note 05 §5). The design space cleanly partitions into **search-based** (retrieve only the candidate-relevant subset from the lifelong history), **compression-based** (summarize the whole history into fixed-size state — pooling / clustering / learnable query tokens), and **hybrid**. **So what for metrics:** once short-window sequence modeling matures, lifelong modeling is the main remaining lever — it recovers stale-but-real interests short windows drop. **Trade-off:** search-based is accurate but adds per-candidate online latency; compression-based is candidate-invariant (cacheable) but lossy. → **[Note 05 §5 (SIM)](05_Sequence_Modeling.md)** for the foundation; **[Note 10 §7](10_Scaling_Laws_and_Large_Model_Architectures.md)** for the lifelong taxonomy and QARM V2.
 
-### 4. LLM reasoning & agentic recsys (LLM 推理与智能体推荐)
+### 4. LLM reasoning & agentic recsys
 
-The newest and least-proven frontier imports LLM **reasoning (推理)** and **agents (智能体)** into the pipeline: **reasoning re-rankers** that generate an explicit rationale before re-ordering the final list (Meta GR2, 2026) — a natural extension of the re-ranking stage in Part 07; **simulated environments** to train/evaluate agentic recommenders without burning real traffic (Meta RecoWorld, 2025); and **self-evolving / AutoML pipelines** where LLM agents autonomously propose, test, and ship model changes end-to-end (Google, 2026) — a potential answer to the slow-iteration pain of §3.4's online-learning machine budget and the "old-soup" catch-up problem of §3.5. **So what for metrics:** reasoning can lift quality on hard, sparse, or explanation-sensitive surfaces, and agentic AutoML could compress the LT7/LT30 experiment cycle that currently throttles iteration. **Trade-off:** **latency and cost (延迟与成本)** — token-by-token LLM inference is orders of magnitude more expensive than a forward pass, so reasoning is realistic mainly at the final re-rank stage (tens of items) or offline, not in retrieval/pre-rank.
+The least-proven frontier imports LLM **reasoning** and **agents** into the pipeline: reasoning re-rankers that generate an explicit rationale before re-ordering (Meta GR2); simulated user environments to train and evaluate agentic recommenders without burning real traffic (Meta RecoWorld); and self-evolving / AutoML pipelines where LLM agents autonomously propose, test, and ship model changes (Google Self-Evolving) — a potential answer to §3.4's online-learning resource pain and §3.5's old-soup catch-up. **So what for metrics:** reasoning can lift quality on hard, sparse, or explanation-sensitive surfaces; agentic AutoML compresses the LT7/LT30 experiment cycle. **Trade-off:** token-by-token LLM inference is orders of magnitude more expensive than a forward pass, so reasoning is realistic mainly at the final re-rank stage (tens of items) or offline, not in retrieval / pre-rank. → **[Note 11 — LLM-Augmented & Agentic Recommenders](11_LLM_Augmented_and_Agentic_Recommenders.md)**.
 
-### 5. Generative retrieval & serving efficiency (生成式召回与推理效率)
+### 5. Generative retrieval & serving efficiency
 
-If items are semantic-token sequences (Theme 1), retrieval becomes **constrained decoding (受约束解码)**: generate a valid token sequence that must correspond to a real item, enforced by a **trie (前缀树)** of all valid item tokens. The 2026 work is overwhelmingly about making this run on accelerators: **vectorizing the trie** so constrained decoding is GPU/TPU-friendly rather than a branchy CPU walk (Google/YouTube STATIC, 2026), **MoE load balancing** so sparse experts don't bottleneck (Meta replicate-and-quantize, 2026), and **custom attention kernels** for recsys-shaped workloads (PyTorch GDPA, 2026). **So what for metrics:** generative retrieval is the GR-native replacement for the two-tower + ANN channels of §2.2 — and serving efficiency is what decides whether it is *deployable at all* under the fixed retrieval budget of §2.1. **Trade-off:** generative retrieval unifies the funnel and can improve recall on tail items, but constrained decoding is far heavier than an ANN lookup, so the entire research thrust is clawing back that latency.
+If items are semantic-token sequences (Theme 1), retrieval becomes **constrained decoding** — generate a valid token sequence that must correspond to a real item, enforced by a **trie** of all valid item codes. The 2026 work is overwhelmingly about making this run on accelerators: vectorizing the trie so constrained decoding is GPU/TPU-friendly (Google STATIC), MoE load balancing so sparse experts don't bottleneck (Meta replicate-and-quantize), and custom attention kernels for recsys workloads (PyTorch GDPA). **So what for metrics:** the GR-native replacement for the two-tower + ANN channels of §2.1–§2.2; serving efficiency decides whether it is deployable at all under the fixed retrieval budget. **Trade-off:** unifies the funnel and lifts tail recall, but constrained decoding is far heavier than an ANN lookup — the entire thrust is clawing back the latency. → **[Note 09 §3](09_Generative_Recommendation_and_Semantic_IDs.md)** for the decoding mechanism; **[Note 12 — Serving & Inference Efficiency](12_Serving_and_Inference_Efficiency.md)** for the kernels and trie systems.
 
-### 6. Industrial foundation-model lessons (工业级基础模型经验)
+### 6. Industrial foundation-model lessons
 
-Finally, the "practical lessons" track shows how non-frontier-lab companies actually adopt GR: **user foundation models (用户基础模型)** that learn one reusable user representation across many downstream tasks (Coinbase, 2026); **multimodal content foundation models (多模态内容基础模型)** for understanding items and powering cold-start (Netflix MediaFM, 2026) — the production-grade version of the BERT/CLIP content features in §3.3 and §4.1; large-scale **sequential recommenders (序列推荐器)** for feed ranking (LinkedIn, 2026); and **Hetero-MMoE (异构 MMoE)** that extends the MMoE/PLE multi-task structure of §3.1 with heterogeneous experts (Uber, 2026). **So what for metrics:** a shared foundation model amortizes representation-learning cost across teams and gives cold users/items a strong prior — directly attacking the special-population sparsity problem of §5. **Trade-off:** foundation models centralize a dependency (one model many teams must trust) and reintroduce a sharper version of the §3.5 "old-soup" / staleness risk — when the shared backbone lags, *everything* downstream lags.
+How non-frontier-lab companies actually adopt GR: **user foundation models** that learn one reusable user representation across many downstream tasks (Coinbase); **multimodal content foundation models** for understanding items and powering cold-start (Netflix MediaFM — the production version of the BERT/CLIP content features in §3.3 and §4.1); large-scale **sequential recommenders** for feed ranking (LinkedIn); and **Hetero-MMoE** extending §3.1's multi-task structure with heterogeneous experts (Uber). **So what for metrics:** a shared foundation model amortizes representation-learning cost across teams and gives cold users/items a strong prior — directly attacking §5's special-population sparsity and §3.5's old-soup catch-up. **Trade-off:** foundation models centralize a dependency (one backbone many teams must trust) and reintroduce a sharper version of the staleness risk — when the backbone lags, *everything* downstream lags. → **[Note 11 §1 (LLM-as-encoder spectrum)](11_LLM_Augmented_and_Agentic_Recommenders.md)** for framing; **[Note 07 — Item Cold-Start](07_Item_Cold_Start.md)** for the MediaFM cold-start angle.
 
 ### Cross-references
 
-Each theme is developed in depth in the **Expanded Reading (扩展阅读)** sections that accompany the earlier notes, where the representative papers are read in detail:
+Each theme is covered in depth in the dedicated frontier Notes 09–12; the per-paper write-ups stay in the **Expanded Reading** sections of the relevant fundamentals notes (no bibliography is duplicated here).
 
-- **Generative retrieval & semantic IDs** → Note 02 (Retrieval / 召回).
-- **Pre-ranking under GR (pseudo-labeling, heterogeneity-aware pre-rank)** → Note 03 (Pre-rank / 粗排).
-- **Scaling laws, unified Transformers, foundation models, Hetero-MMoE** → Note 04 (Fine-rank / 精排).
-- **Lifelong / ultra-long sequence modeling** → Note 05 (Behavior-sequence modeling / 行为序列).
-- **Online experimentation, self-evolving / agentic AutoML** → Note 06 (Online A/B testing / 线上实验).
-- **Reasoning re-rankers & generative re-ranking** → Note 07 (Re-ranking / 重排).
-- (Diversity and multimodal content features recur as cross-cutting threads in Notes 04–05 and §4 here.)
-
-### Frontier References (2026)
-
-- ByteDance (2026). *Farewell to item IDs: Unlocking the scaling potential of large ranking models via semantic tokens* (TRM). arXiv. https://arxiv.org/abs/2601.22694
-- ByteDance (2025). *OneTrans: Unified feature interaction and sequence modeling with one transformer in industrial recommender*. arXiv. https://arxiv.org/abs/2510.26104
-- Coinbase (2026). *Scaling personalization with user foundation models*. Coinbase Engineering Blog.
-- Google (2026). *Vectorizing the trie: Efficient constrained decoding for LLM-based generative retrieval on accelerators* (STATIC). arXiv. https://arxiv.org/abs/2602.22647
-- Google DeepMind (2026). *Self-evolving recommendation system: End-to-end autonomous model optimization with LLM agents*. arXiv. https://arxiv.org/abs/2602.10226
-- Kuaishou (2026). *A survey of user lifelong behavior modeling: Perspectives on efficiency and effectiveness*. Preprints.org.
-- Kuaishou (2026). *QARM V2: Quantitative alignment multi-modal recommendation for reasoning user sequence modeling*. arXiv. https://arxiv.org/abs/2602.08559
-- LinkedIn (2026). *An industrial-scale sequential recommender for LinkedIn feed ranking*. arXiv. https://arxiv.org/abs/2602.12354
-- Meta AI (2026). *How well does generative recommendation generalize?* arXiv. https://arxiv.org/abs/2603.19809
-- Meta AI (2026). *Kunlun: Establishing scaling laws for massive-scale recommendation systems through unified architecture design*. arXiv. https://arxiv.org/abs/2602.10016
-- Meta AI (2026). *Generative reasoning re-ranker (GR2)*. arXiv. https://arxiv.org/abs/2602.07774
-- Meta AI (2026). *Bending the scaling-law curve in large-scale recommendation systems* (ULTRA-HSTU). arXiv. https://arxiv.org/abs/2602.16986
-- Meta AI (2025). *RecoWorld: Building simulated environments for agentic recommender systems*. arXiv. https://arxiv.org/abs/2509.10397
-- Netflix (2026). *MediaFM: The multimodal AI foundation for media understanding at Netflix*. Netflix Technology Blog.
-- PyTorch (2026). *Generalized dot-product attention: Tackling real-world challenges in GPU training kernels* (GDPA). PyTorch Blog.
-- Uber (2026). *Transforming ads personalization with sequential modeling and Hetero-MMoE at Uber*. Uber Engineering Blog.
+| Theme | Dedicated frontier note(s) | Per-paper Expanded Reading |
+|---|---|---|
+| 1. Generative Recommendation & semantic IDs | [Note 09](09_Generative_Recommendation_and_Semantic_IDs.md) | [Note 02](02_Candidate_Retrieval.md) — TRM, STATIC, TrieRec |
+| 2. Scaling laws & unified Transformers | [Note 10](10_Scaling_Laws_and_Large_Model_Architectures.md) | [Note 04](04_Feature_Interaction.md) — InterFormer, OneTrans, HyFormer, MixFormer, TokenMixer-Large, Kunlun, EST, HeMix |
+| 3. Lifelong / ultra-long sequence modeling | [Note 10 §7](10_Scaling_Laws_and_Large_Model_Architectures.md) | [Note 05](05_Sequence_Modeling.md) — ULTRA-HSTU, ULBM survey, QARM V2 |
+| 4. LLM reasoning & agentic recsys | [Note 11](11_LLM_Augmented_and_Agentic_Recommenders.md) | [Note 06](06_Reranking_and_Diversity.md) — GR2, RecoWorld, Self-Evolving |
+| 5. Generative retrieval & serving efficiency | [Note 09 §3](09_Generative_Recommendation_and_Semantic_IDs.md), [Note 12](12_Serving_and_Inference_Efficiency.md) | [Note 02](02_Candidate_Retrieval.md), [Note 03](03_Ranking_Models.md) — GDPA, R&Q MoE |
+| 6. Industrial foundation-model lessons | [Note 11 §1](11_LLM_Augmented_and_Agentic_Recommenders.md), [Note 07](07_Item_Cold_Start.md) | [Note 03](03_Ranking_Models.md) — Uber Hetero-MMoE; [Note 05](05_Sequence_Modeling.md) — Coinbase UFM; [Note 07](07_Item_Cold_Start.md) — Netflix MediaFM |
 
 ## Pinterest in Practice (2024–2026)
 

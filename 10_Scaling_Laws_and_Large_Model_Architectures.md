@@ -17,8 +17,10 @@ The one-sentence thesis: **LLMs taught us that loss falls as a predictable power
 7. [Lifelong / Ultra-Long Sequence Taxonomy](#7-lifelong--ultra-long-sequence-taxonomy)
 8. [Efficiency Is the Real Bottleneck](#8-efficiency-is-the-real-bottleneck)
 9. [Trade-offs & Open Questions](#9-trade-offs--open-questions)
-10. [Interview Cheat-Sheet](#10-key-insights)
+10. [Key Insights](#10-key-insights)
 11. [References](#11-references)
+12. [Pinterest in Practice (2024–2026)](#pinterest-in-practice-20242026)
+   - [PinFM](#pinfm)
 
 ---
 
