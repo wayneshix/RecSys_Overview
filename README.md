@@ -1,4 +1,4 @@
-# Recommendation Systems — A Overview
+# Recommendation Systems — Overview
 
 A self-contained study archive for **industrial recommendation systems**, written for engineers preparing for ML / recommender-system interviews and for anyone who wants a path from first principles to the 2026 research frontier.
 
