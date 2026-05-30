@@ -1,4 +1,4 @@
-# Recommendation Systems — Class Notes (English)
+# Recommendation Systems — A Overview
 
 A self-contained study archive for **industrial recommendation systems**, written for engineers preparing for ML / recommender-system interviews and for anyone who wants a path from first principles to the 2026 research frontier.
 
